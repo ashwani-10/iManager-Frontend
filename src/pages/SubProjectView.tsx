@@ -94,7 +94,7 @@ export default function SubProjectView() {
   const [isLoading, setIsLoading] = useState(true);
 
   // Add new state for history tab and history data
-  const [activeTab, setActiveTab] = useState<'comments' | 'history'>('comments');
+  const [activeTab, setActiveTab] = useState<'comments' | 'history' | 'pullRequests'>('comments');
   const [taskHistory] = useState([
     {
       id: '1',
@@ -118,6 +118,17 @@ export default function SubProjectView() {
 
   // Add new state for comments loading
   const [isCommentsLoading, setIsCommentsLoading] = useState(false);
+
+  // Add new state for pull requests
+  const [pullRequests, setPullRequests] = useState<{
+    id: string;
+    username: string;
+    title: string;
+    url: string;
+    baseBranch: string;
+    targetBranch: string;
+    state: string;
+  }[]>([]);
 
   useEffect(() => {
     const storedRoles = localStorage.getItem('roles');
@@ -699,6 +710,36 @@ export default function SubProjectView() {
     }
   };
 
+  // Fetch pull requests for the task
+  const fetchPullRequests = async (taskId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(
+        `http://localhost:8085/api/pull-requests/get/${taskId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.data) {
+        setPullRequests(response.data.map((pr: any) => ({
+          id: pr.id,
+          username: pr.username,
+          title: pr.title,
+          url: pr.url,
+          baseBranch: pr.baseBranch,
+          targetBranch: pr.targetBranch,
+          state: pr.state
+        })));
+      }
+    } catch (error: any) {
+      console.error('Failed to fetch pull requests:', error.response?.data || error.message);
+    }
+  };
+
   const handleDeleteTask = async (taskId: string, columnId: string) => {
     try {
       const token = localStorage.getItem('token');
@@ -734,6 +775,53 @@ export default function SubProjectView() {
   // Fetch the current logged-in user's name
   const storedUser = localStorage.getItem('user');
   const currentUserName = storedUser ? JSON.parse(storedUser).name : 'Unknown User';
+
+  // Update fetch logic when opening the task modal
+  useEffect(() => {
+    if (newTask.id) {
+      fetchTaskComments(newTask.id);
+      fetchPullRequests(newTask.id); // Fetch pull requests
+    }
+  }, [newTask.id]);
+
+  // Update the onClick handler for tasks to include fetching pull requests
+  const handleTaskClick = async (task: Task, columnId: string) => {
+    setNewTask({
+      ...task,
+      columnId,
+    });
+    setIsEditMode(false);
+    setShowTaskModal(true);
+  
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(
+        `http://localhost:8085/api/github/get/pr/${task.ticketId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      console.log('Pull requests response:', response.data); // Debug log
+      if (response.data) {
+        setPullRequests(response.data.map((pr: any) => ({
+          id: pr.id,
+          username: pr.author || 'Unknown User', // Ensure username is set correctly
+          title: pr.prTitle || 'No Title',
+          url: pr.prUrl || '#', // Ensure URL is clickable
+          baseBranch: pr.baseBranch || 'Unknown Base', // Ensure base branch is set
+          targetBranch: pr.headBranch || 'Unknown Target', // Ensure target branch is set
+          state: pr.state || 'Unknown State' // Ensure state is set
+        })));
+      }
+    } catch (error: any) {
+      console.error('Failed to fetch pull requests:', error.response?.data || error.message);
+      setPullRequests([]); // Clear pull requests if the API call fails
+    }
+  };
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -1000,15 +1088,7 @@ export default function SubProjectView() {
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}
                                   className="bg-sky-100 rounded-lg shadow-sm p-4 hover:bg-sky-200 border border-transparent hover:border-blue-600 transition-all cursor-pointer"
-                                  onClick={() => {
-                                    setNewTask({
-                                      ...task,
-                                      columnId: column.id,
-                                    });
-                                    setIsEditMode(false);
-                                    setShowTaskModal(true);
-                                    fetchTaskComments(task.id);
-                                  }}
+                                  onClick={() => handleTaskClick(task, column.id)} // Use the updated handler
                                 >
                                   <div className="flex justify-between items-start mb-2">
                                     <span className="font-medium text-[#172B4D] text-sm">{task.title}</span>
@@ -1061,7 +1141,7 @@ export default function SubProjectView() {
         {/* Updated Task Modal */}
         {showTaskModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center p-4">
-            <div className="bg-white rounded-lg p-6 w-full max-w-[1000px] h-[92vh] overflow-y-auto mt-4">
+            <div className="bg-white rounded-lg p-6 w-full max-w-[1300px] h-[95vh] overflow-y-auto mt-4">
               <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-3">
                   {/* Display ticketId */}
@@ -1312,7 +1392,18 @@ export default function SubProjectView() {
                             : 'text-gray-500 hover:text-gray-700'
                         }`}
                       >
-                        Activity logs
+                        History
+                      </button>
+                      {/* Add Pull Requests tab */}
+                      <button
+                        onClick={() => setActiveTab('pullRequests')}
+                        className={`py-3 px-4 text-base font-medium relative ${
+                          activeTab === 'pullRequests'
+                            ? 'text-blue-600 border-b-2 border-blue-600'
+                            : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                      >
+                        Pull Requests
                       </button>
                     </div>
                   </div>
@@ -1382,7 +1473,7 @@ export default function SubProjectView() {
                         </div>
                       </div>
                     </>
-                  ) : (
+                  ) : activeTab === 'history' ? (
                     // History Tab Content
                     <div className="space-y-4 max-h-[400px] overflow-y-auto">
                       {taskHistory.map(item => (
@@ -1425,6 +1516,45 @@ export default function SubProjectView() {
                           <p className="text-xs text-gray-400 mt-1">Changes to this task will appear here</p>
                         </div>
                       )}
+                    </div>
+                  ) : (
+                    <div className="space-y-4 max-h-[400px] overflow-y-auto">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="border-b border-gray-200">
+                            <th className="px-4 py-2 text-sm font-medium text-gray-700">Username</th>
+                            <th className="px-4 py-2 text-sm font-medium text-gray-700">Title</th>
+                            <th className="px-4 py-2 text-sm font-medium text-gray-700">URL</th>
+                            <th className="px-4 py-2 text-sm font-medium text-gray-700">Base Branch</th>
+                            <th className="px-4 py-2 text-sm font-medium text-gray-700">Target Branch</th>
+                            <th className="px-4 py-2 text-sm font-medium text-gray-700">State</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {pullRequests.length === 0 ? (
+                            <tr>
+                              <td colSpan={6} className="px-4 py-2 text-sm text-gray-500 text-center">
+                                No pull requests available
+                              </td>
+                            </tr>
+                          ) : (
+                            pullRequests.map(pr => (
+                              <tr key={pr.id} className="border-b border-gray-200 hover:bg-gray-50">
+                                <td className="px-4 py-2 text-sm text-gray-900">{pr.username}</td>
+                                <td className="px-4 py-2 text-sm text-gray-900">{pr.title}</td>
+                                <td className="px-4 py-2 text-sm text-blue-600">
+                                  <a href={pr.url} target="_blank" rel="noopener noreferrer">
+                                    {pr.url} {/* Display the actual URL */}
+                                  </a>
+                                </td>
+                                <td className="px-4 py-2 text-sm text-gray-900">{pr.baseBranch}</td>
+                                <td className="px-4 py-2 text-sm text-gray-900">{pr.targetBranch}</td>
+                                <td className="px-4 py-2 text-sm text-gray-900">{pr.state}</td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
                     </div>
                   )}
                 </div>
