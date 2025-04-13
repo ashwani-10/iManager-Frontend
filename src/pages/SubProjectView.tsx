@@ -18,6 +18,7 @@ interface Task {
   priority: string;
   status: string;
   columnId?: string;
+  ticketId: string; // Added ticketId field
 }
 
 interface Column {
@@ -73,7 +74,8 @@ export default function SubProjectView() {
     assignee: { id: '', name: '' },
     priority: 'MEDIUM',
     status: '',
-    columnId: ''
+    columnId: '',
+    ticketId: '' // Initialize ticketId
   });
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState('');
@@ -211,7 +213,8 @@ export default function SubProjectView() {
                 id: task.assignedUser?.id || '',
                 name: task.assignedUser?.name || ''
               },
-              columnId: column.id
+              columnId: column.id,
+              ticketId: task.ticketId || 'N/A' // Map ticketId from API response
             }))
         }));
 
@@ -461,7 +464,8 @@ export default function SubProjectView() {
                   id: createdTask.assignedUser.id,
                   name: createdTask.assignedUser.name
                 },
-                columnId
+                columnId,
+                ticketId: createdTask.ticketId // Set ticketId
               }]
             };
           }
@@ -486,7 +490,8 @@ export default function SubProjectView() {
           assignee: { id: '', name: '' },
           priority: 'MEDIUM',
           status: '',
-          columnId: ''
+          columnId: '',
+          ticketId: '' // Reset ticketId
         });
       }
       toast.success('Task created successfully!');
@@ -535,7 +540,8 @@ export default function SubProjectView() {
       assignee: { id: '', name: '' },
       priority: 'MEDIUM',
       status: '',
-      columnId: ''
+      columnId: '',
+      ticketId: '' // Reset ticketId
     });
     setIsEditMode(false);
   };
@@ -995,7 +1001,7 @@ export default function SubProjectView() {
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}
-                                  className="bg-sky-100 rounded-lg shadow-sm p-4 hover:bg-sky-200 border border-transparent hover:border-blue-600 transition-all cursor-pointer"
+                                  className="bg-sky-100 rounded-lg shadow-sm p-4 hover:bg-sky-200 border border-transparent hover:border-blue-600 transition-all cursor-pointer relative"
                                   onClick={() => {
                                     setNewTask({
                                       ...task,
@@ -1006,38 +1012,41 @@ export default function SubProjectView() {
                                     fetchTaskComments(task.id);
                                   }}
                                 >
-                                  <div className="flex justify-between items-start mb-2">
-                                    <span className="font-medium text-[#172B4D] text-sm">{task.title}</span>
-                                  </div>
-                                  {task.description && (
-                                    <p className="text-gray-600 text-xs truncate mb-2">
-                                      {task.description}
-                                    </p>
-                                  )}
-                                  <div className="flex items-center gap-2 flex-wrap">
-                                    {task.assignee.name ? (
-                                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                                        {task.assignee.name}
-                                      </span>
-                                    ) : (
-                                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                                        Unassigned
-                                      </span>
-                                    )}
-                                    <div
-                                      className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                        task.priority === 'HIGH'
-                                          ? 'bg-red-100 text-red-700'
-                                          : task.priority === 'MEDIUM'
-                                          ? 'bg-orange-100 text-orange-700'
-                                          : 'bg-green-100 text-green-700'
-                                      }`}
-                                    >
-                                      {task.priority}
+                                  {/* Display ticketId at the top-left corner */}
+                                  <div className="flex flex-col gap-2">
+                                    <div className="flex justify-between items-start">
+                                      <span className="font-medium text-[#172B4D] text-sm">{task.title}</span>
                                     </div>
-                                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
-                                      {column.name}
-                                    </span>
+                                    {task.description && (
+                                      <p className="text-gray-600 text-xs truncate">
+                                        {task.description}
+                                      </p>
+                                    )}
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      {task.assignee.name ? (
+                                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                                          {task.assignee.name}
+                                        </span>
+                                      ) : (
+                                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                          Unassigned
+                                        </span>
+                                      )}
+                                      <div
+                                        className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                          task.priority === 'HIGH'
+                                            ? 'bg-red-100 text-red-700'
+                                            : task.priority === 'MEDIUM'
+                                            ? 'bg-orange-100 text-orange-700'
+                                            : 'bg-green-100 text-green-700'
+                                        }`}
+                                      >
+                                        {task.priority}
+                                      </div>
+                                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                                        {column.name}
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
                               )}
@@ -1059,9 +1068,17 @@ export default function SubProjectView() {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center p-4">
             <div className="bg-white rounded-lg p-6 w-full max-w-[1000px] h-[92vh] overflow-y-auto mt-4">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {!newTask.id ? 'Create Task' : 'Task Details'}
-                </h2>
+                <div className="flex flex-col">
+                  {/* Display ticketId at the top-left corner */}
+                  {newTask.ticketId && (
+                    <div className="text-sm font-bold text-sky-600 mb-2">
+                      TICKET-ID: {newTask.ticketId}
+                    </div>
+                  )}
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    {!newTask.id ? 'Create Task' : 'Task Details'}
+                  </h2>
+                </div>
                 <div className="flex items-center gap-3">
                   {newTask.id && (
                     <>
@@ -1097,7 +1114,8 @@ export default function SubProjectView() {
                         assignee: { id: '', name: '' },
                         priority: 'MEDIUM',
                         status: '',
-                        columnId: ''
+                        columnId: '',
+                        ticketId: '' // Reset ticketId
                       });
                     }}
                     className="text-gray-500 hover:text-gray-700"
@@ -1260,7 +1278,8 @@ export default function SubProjectView() {
                         assignee: { id: '', name: '' },
                         priority: 'MEDIUM',
                         status: '',
-                        columnId: ''
+                        columnId: '',
+                        ticketId: '' // Reset ticketId
                       });
                     }}
                     className="px-6 py-2.5 text-base text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg"
