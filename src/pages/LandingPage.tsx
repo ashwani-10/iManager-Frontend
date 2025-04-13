@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, ArrowRight, Star, Users, Zap, Shield } from 'lucide-react';
+import { CheckCircle2, ArrowRight, Star, Users, Zap, Shield, Layout } from 'lucide-react';
 
 const plans = [
   {
@@ -49,10 +49,8 @@ export default function LandingPage() {
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     console.error('Image failed to load:', e.currentTarget.src);
-    // Using a simple text-based logo as fallback
     if (e.currentTarget.alt === 'iManager Logo') {
-      e.currentTarget.style.display = 'none'; // Hide the broken image
-      // The text logo "iManager" will still be visible
+      e.currentTarget.style.display = 'none';
     } else {
       e.currentTarget.src = 'https://via.placeholder.com/800x400?text=iManager+Dashboard';
     }
@@ -68,89 +66,100 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Navigation - Updated with simplified branding */}
-      <nav className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 border-b border-gray-100">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-                <span className="text-xl font-bold text-white">i</span>
-              </div>
-              <h1 className="text-2xl font-bold text-indigo-600">iManager</h1>
-            </div>
-            <div className="flex items-center gap-6">
-              <button onClick={() => navigate('/login')} className="text-gray-600 hover:text-gray-900">
-                Log In
-              </button>
-              <button
-                onClick={() => navigate('/signup')}
-                className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
-              >
-                Get Started
-              </button>
-            </div>
+    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-50 relative overflow-hidden">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-0 left-0 w-96 h-96 bg-indigo-100 rounded-full blur-3xl opacity-50 -z-10"></div>
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-200 rounded-full blur-3xl opacity-50 -z-10"></div>
+
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 bg-white shadow-md z-50">
+        <div className="container mx-auto px-6 py-2 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <Layout className="w-9 h-9 text-[#0052CC] hover:text-indigo-700 transition-colors cursor-pointer" />
+            <h1
+              className="text-2xl font-extrabold text-gray-900 hover:text-indigo-600 transition-colors cursor-pointer relative group"
+              onClick={() => navigate('/')}
+            >
+              iManager
+              <span className="absolute bottom-0 left-0 w-0 h-1 bg-indigo-600 transition-all duration-300 group-hover:w-full"></span>
+            </h1>
+          </div>
+          <div className="flex items-center gap-6">
+            <button
+              onClick={() => navigate('/login')}
+              className="text-gray-700 hover:text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-600 rounded"
+            >
+              Log In
+            </button>
+            <button
+              onClick={() => navigate('/signup')}
+              className="bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700 transition focus:outline-none focus:ring-2 focus:ring-indigo-600"
+            >
+              Get Started
+            </button>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <div className="container mx-auto px-4 pt-32 pb-20">
-        <div className="text-center max-w-4xl mx-auto">
-          <h1 className="text-6xl font-bold text-gray-900 mb-6 leading-tight">
-            Manage Projects with <span className="text-indigo-600">Confidence</span>
-          </h1>
-          <p className="text-xl text-gray-600 mb-12 leading-relaxed">
-            iManager helps teams stay organized, meet deadlines, and deliver exceptional results. 
-            Experience the future of project management today.
-          </p>
-          <div className="flex justify-center gap-4">
-            <button
-              onClick={() => navigate('/signup')}
-              className="bg-indigo-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-indigo-700 transition flex items-center gap-2"
-            >
-              Get Started
-              <ArrowRight className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => navigate('/demo')}
-              className="border border-indigo-600 text-indigo-600 px-8 py-4 rounded-lg font-semibold hover:bg-indigo-50 transition"
-            >
-              Watch Demo
-            </button>
-          </div>
+      <div className="container mx-auto px-6 pt-32 pb-20 text-center">
+        <h1 className="text-5xl font-extrabold text-gray-900 mb-6 leading-tight">
+          Manage Projects with <span className="text-indigo-600 underline decoration-wavy decoration-indigo-400">Confidence</span>
+        </h1>
+        <p className="text-lg text-gray-600 mb-12 leading-relaxed">
+          iManager helps teams stay organized, meet deadlines, and deliver exceptional results.
+          <p></p>
+          <span className="font-bold text-indigo-600"> Experience the future of project management today.</span>
+        </p>
+        <div className="flex justify-center gap-4">
+          <button
+            onClick={() => navigate('/signup')}
+            className="bg-indigo-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-indigo-700 transition-all duration-300 transform hover:scale-110 flex items-center gap-2 focus:outline-none focus:ring-4 focus:ring-indigo-400 relative overflow-hidden shadow-lg"
+          >
+            <span className="relative z-10">Get Started</span>
+            <ArrowRight className="w-5 h-5 relative z-10" />
+            <span className="absolute inset-0 bg-indigo-700 transform scale-x-0 origin-left transition-transform duration-300 hover:scale-x-100 z-0"></span>
+          </button>
+          <button
+            onClick={() => navigate('/demo')}
+            className="border border-indigo-600 text-indigo-600 px-8 py-3 rounded-lg font-bold hover:bg-indigo-50 hover:text-indigo-700 transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-4 focus:ring-indigo-400 shadow-lg"
+          >
+            Watch Demo
+          </button>
         </div>
+      </div>
 
-        {/* Feature Preview - Updated with actual dashboard image */}
-        <div className="mt-20">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="relative rounded-xl overflow-hidden shadow-2xl">
-              <img
-                src={DASHBOARD_PREVIEW}
-                alt="iManager Dashboard"
-                className="w-full h-auto object-cover rounded-xl"
-                onError={handleImageError}
-              />
-              {/* Optional overlay for better visibility */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
-            </div>
+      {/* Feature Preview */}
+      <div className="mt-16">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="relative rounded-lg overflow-hidden shadow-lg group">
+            <img
+              src={DASHBOARD_PREVIEW}
+              alt="iManager Dashboard"
+              className="w-full h-auto object-cover group-hover:scale-105 transition-transform"
+              onError={handleImageError}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
           </div>
         </div>
       </div>
 
       {/* Features Section */}
-      <div className="bg-gray-50 py-24">
-        <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center text-gray-900 mb-16">
-            Why Choose iManager?
+      <div className="bg-gray-50 py-20">
+        <div className="container mx-auto px-6">
+          <h2 className="text-4xl font-extrabold text-center text-gray-900 mb-12">
+            Why <span className="text-indigo-600 underline decoration-wavy decoration-indigo-400">Choose</span> iManager?
           </h2>
           <div className="grid md:grid-cols-3 gap-12 max-w-5xl mx-auto">
             {features.map((feature, index) => (
-              <div key={index} className="text-center">
-                <div className="bg-white w-16 h-16 rounded-lg shadow-md flex items-center justify-center mx-auto mb-6">
+              <div
+                key={index}
+                className="text-center hover:shadow-xl transition-shadow p-6 rounded-lg bg-white border border-gray-200 hover:border-indigo-600"
+              >
+                <div className="bg-indigo-100 w-16 h-16 rounded-full shadow-md flex items-center justify-center mx-auto mb-6">
                   {feature.icon}
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">{feature.title}</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">{feature.title}</h3>
                 <p className="text-gray-600">{feature.description}</p>
               </div>
             ))}
@@ -159,31 +168,31 @@ export default function LandingPage() {
       </div>
 
       {/* Pricing Section */}
-      <div className="bg-white py-24">
-        <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center text-gray-900 mb-16">
-            Choose Your Perfect Plan
+      <div className="bg-white py-20">
+        <div className="container mx-auto px-6">
+          <h2 className="text-4xl font-extrabold text-center text-gray-900 mb-12">
+            Choose Your <span className="text-indigo-600 underline decoration-wavy decoration-indigo-400">Perfect Plan</span>
           </h2>
-          <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {plans.map((plan) => (
               <div
                 key={plan.name}
-                className={`relative bg-white rounded-xl shadow-lg p-8 border-2 
-                  ${plan.popular ? 'border-indigo-600 scale-105' : 'border-gray-100'}`}
+                className={`relative bg-white rounded-lg shadow-lg p-8 border hover:shadow-xl transition-shadow transform hover:scale-105 
+                  ${plan.popular ? 'border-indigo-600 scale-105' : 'border-gray-200'}`}
               >
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-indigo-600 text-white text-sm px-3 py-1 rounded-full">
+                    <span className="bg-indigo-600 text-white text-sm px-3 py-1 rounded-full shadow-md">
                       Most Popular
                     </span>
                   </div>
                 )}
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">{plan.name}</h3>
-                <div className="text-4xl font-bold text-indigo-600 mb-6">
+                <div className="text-4xl font-extrabold text-indigo-600 mb-6">
                   {plan.price}
                   <span className="text-lg text-gray-500">/month</span>
                 </div>
-                <ul className="space-y-4 mb-8">
+                <ul className="space-y-3 mb-8">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-center gap-2">
                       <CheckCircle2 className="text-green-500 w-5 h-5" />
@@ -193,10 +202,10 @@ export default function LandingPage() {
                 </ul>
                 <button
                   onClick={() => handleGetStarted(plan)}
-                  className={`w-full py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2
+                  className={`w-full py-3 rounded-lg font-bold transition-all duration-300 transform hover:scale-110 flex items-center justify-center gap-2 focus:outline-none focus:ring-4 focus:ring-indigo-400 shadow-lg
                     ${plan.popular 
                       ? 'bg-indigo-600 text-white hover:bg-indigo-700' 
-                      : 'border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50'}`}
+                      : 'border border-indigo-600 text-indigo-600 hover:bg-indigo-50'}`}
                 >
                   Get Started
                   <ArrowRight className="w-4 h-4" />
@@ -209,10 +218,10 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-6">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-2xl font-bold mb-4">iManager</h3>
+              <h3 className="text-xl font-bold mb-4">iManager</h3>
               <p className="text-gray-400">
                 Making project management simple and effective for teams of all sizes.
               </p>
@@ -220,25 +229,25 @@ export default function LandingPage() {
             <div>
               <h4 className="font-semibold mb-4">Product</h4>
               <ul className="space-y-2 text-gray-400">
-                <li>Features</li>
-                <li>Pricing</li>
-                <li>Security</li>
+                <li className="hover:text-white transition-colors cursor-pointer">Features</li>
+                <li className="hover:text-white transition-colors cursor-pointer">Pricing</li>
+                <li className="hover:text-white transition-colors cursor-pointer">Security</li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Company</h4>
               <ul className="space-y-2 text-gray-400">
-                <li>About Us</li>
-                <li>Careers</li>
-                <li>Contact</li>
+                <li className="hover:text-white transition-colors cursor-pointer">About Us</li>
+                <li className="hover:text-white transition-colors cursor-pointer">Careers</li>
+                <li className="hover:text-white transition-colors cursor-pointer">Contact</li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Resources</h4>
               <ul className="space-y-2 text-gray-400">
-                <li>Blog</li>
-                <li>Documentation</li>
-                <li>Support</li>
+                <li className="hover:text-white transition-colors cursor-pointer">Blog</li>
+                <li className="hover:text-white transition-colors cursor-pointer">Documentation</li>
+                <li className="hover:text-white transition-colors cursor-pointer">Support</li>
               </ul>
             </div>
           </div>
