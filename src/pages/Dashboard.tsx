@@ -20,9 +20,9 @@ export default function Dashboard() {
   const [newProjectName, setNewProjectName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
+  const [page] = useState(1);
   const [limit] = useState(9);
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMore] = useState(false);
 
   const isAdmin = user?.role === 'ADMIN';
 
@@ -30,7 +30,7 @@ export default function Dashboard() {
     if (user?.id) {
       fetchProjects();
     }
-  }, [user, page]);
+  }, [user]);
 
   const fetchProjects = async () => {
     setIsLoading(true);
@@ -52,9 +52,7 @@ export default function Dashboard() {
       );
 
       const projectsData = Array.isArray(response.data) ? response.data : [];
-      setHasMore(projectsData.length === limit);
-
-      setProjects(prev => page === 1 ? projectsData : [...prev, ...projectsData]);
+      setProjects(projectsData);
     } catch (error: any) {
       console.error('Failed to fetch projects:', error);
       toast.error('Failed to load projects');
@@ -96,7 +94,7 @@ export default function Dashboard() {
       const newProject = {
         id: response.data.id,
         name: response.data.name,
-        createdAt: new Date().toISOString(),
+        createdAt: response.data.createdAt.toString()
       };
 
       setProjects(prev => [...prev, newProject]);
@@ -129,10 +127,10 @@ export default function Dashboard() {
   const ProjectsGrid = useMemo(() => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {projects.length === 0 && !isLoading ? (
-        <div className="col-span-full flex flex-col items-center justify-center py-12 px-4 border-2 border-dashed border-gray-300 rounded-lg">
+        <div className="col-span-full flex flex-col items-center justify-center py-12 px-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
           <h3 className="text-lg font-medium text-gray-900 mb-2 font-inter">No projects yet</h3>
           <p className="text-gray-500 text-center mb-4 font-inter">
-            Click the "New Project" button above to get started
+            Click the <span className="font-semibold text-indigo-600">"New Project"</span> button above to get started
           </p>
         </div>
       ) : (
@@ -140,7 +138,7 @@ export default function Dashboard() {
           {projects.map(project => (
             <div
               key={project.id}
-              className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition"
+              className="bg-white rounded-lg shadow-md border border-gray-200 p-6 hover:shadow-lg transition-transform transform hover:scale-105"
             >
               <h3 className="text-lg font-semibold text-gray-900 mb-2 font-inter leading-tight">{project.name}</h3>
               <div className="flex justify-between items-center">
@@ -156,35 +154,24 @@ export default function Dashboard() {
               </div>
             </div>
           ))}
-          {hasMore && (
-            <div className="col-span-full flex justify-center mt-4">
-              <button
-                onClick={() => setPage(prev => prev + 1)}
-                disabled={isLoading}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 disabled:opacity-50"
-              >
-                {isLoading ? 'Loading...' : 'Load More'}
-              </button>
-            </div>
-          )}
         </>
       )}
     </div>
-  ), [projects, isLoading, hasMore]);
+  ), [projects, isLoading]);
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen bg-gray-100">
       <Sidebar />
-      <main className="flex-1 bg-gray-50 p-8">
+      <main className="flex-1 bg-white p-8 shadow-lg rounded-lg">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-gray-900 mb-1 font-inter">Workspace</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900 mb-1 font-inter">Workspace</h1>
             <div className="h-1 w-24 bg-indigo-600 rounded-full"></div>
           </div>
           {user?.role === 'ADMIN' && (
             <button
               onClick={() => setShowNewProjectModal(true)}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition flex items-center gap-2 font-inter"
+              className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition flex items-center gap-2 font-inter shadow-md"
             >
               <Plus className="w-5 h-5" />
               New Project
@@ -215,12 +202,12 @@ export default function Dashboard() {
             aria-modal="true"
             aria-labelledby="modal-title"
           >
-            <div className="bg-white rounded-lg p-6 w-96">
+            <div className="bg-white rounded-lg p-6 w-96 shadow-lg">
               <h2 id="modal-title" className="text-xl font-semibold text-gray-900 mb-4 font-inter">Create New Project</h2>
               <input
                 type="text"
                 placeholder="Project Name"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 mb-4 font-inter"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 mb-4 font-inter focus:ring-2 focus:ring-indigo-600 focus:outline-none"
                 value={newProjectName}
                 onChange={(e) => setNewProjectName(e.target.value)}
                 autoFocus

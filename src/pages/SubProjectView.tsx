@@ -4,6 +4,7 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Plus, X, Edit2, Users, Clock, AlertCircle } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 // Add these interfaces at the top
 interface Task {
@@ -363,8 +364,10 @@ export default function SubProjectView() {
         setShowAddMemberModal(false);
         setSelectedMember('');
         setSelectedRole('');
+        toast.success('Member added successfully!');
       }
     } catch (error: any) {
+      toast.error('Failed to add member');
       setAddMemberError(error.response?.data?.message || 'Failed to add member');
     } finally {
       setIsAddingMember(false);
@@ -464,8 +467,8 @@ export default function SubProjectView() {
           }
           return column;
         });
-
         setColumns(updatedColumns);
+        setIsLoading(false);
         
         // Save to localStorage
         const boardData = {
@@ -486,7 +489,9 @@ export default function SubProjectView() {
           columnId: ''
         });
       }
+      toast.success('Task created successfully!');
     } catch (error: any) {
+      toast.error('Failed to create task');
       console.error('Failed to create task:', error);
     }
   };
@@ -535,12 +540,12 @@ export default function SubProjectView() {
     setIsEditMode(false);
   };
 
-  const onDragEnd = (result: any) => {
+  const onDragEnd = async (result: any) => {
     const { source, destination } = result;
-
+  
     // Dropped outside a valid droppable
     if (!destination) return;
-
+  
     // If the task was dropped in the same column and same position
     if (
       source.droppableId === destination.droppableId &&
@@ -548,22 +553,22 @@ export default function SubProjectView() {
     ) {
       return;
     }
-
+  
     const sourceColumn = columns.find(col => col.id === source.droppableId);
     const destColumn = columns.find(col => col.id === destination.droppableId);
-
+  
     if (!sourceColumn || !destColumn) return;
-
+  
     const sourceTasks = [...sourceColumn.tasks];
     const [movedTask] = sourceTasks.splice(source.index, 1);
-
+  
     // Update the task's columnId and status
     movedTask.columnId = destination.droppableId;
     movedTask.status = destColumn.name; // Assuming the column name represents the status
-
+  
     const destTasks = [...destColumn.tasks];
     destTasks.splice(destination.index, 0, movedTask);
-
+  
     const newColumns = columns.map(col => {
       if (col.id === source.droppableId) {
         return { ...col, tasks: sourceTasks };
@@ -573,9 +578,9 @@ export default function SubProjectView() {
       }
       return col;
     });
-
+  
     setColumns(newColumns);
-
+  
     // Save to localStorage
     const boardData = {
       columns: newColumns,
@@ -583,6 +588,32 @@ export default function SubProjectView() {
       tasks: newColumns.flatMap(col => col.tasks)
     };
     localStorage.setItem(`board_${subProjectId}`, JSON.stringify(boardData));
+  
+    // Persist the column change in the database
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(
+        `http://localhost:8085/api/task/update`,
+        {
+          id: movedTask.id,
+          statusId: destination.droppableId,
+          assignedUser:movedTask.assignee.id,
+          priority: movedTask.priority,
+          title: movedTask.title,
+          description: movedTask.description,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      toast.success('Task status updated successfully!');
+    } catch (error: any) {
+      toast.error('Failed to update task status');
+      console.error('Failed to update task status:', error.response?.data || error.message);
+    }
   };
 
   const handleAddComment = async () => {
@@ -612,19 +643,23 @@ export default function SubProjectView() {
         }
       );
 
-      if (response.status === 201 || response.status === 200) {
+      if (response) {
         const newCommentData = {
           id: response.data.id || crypto.randomUUID(),
           taskId: newTask.id,
           text: newComment,
-          userId: userId,
+          userId: response.data.userName, // Changed to userName instead of userId
           createdAt: new Date().toISOString()
         };
 
-        setComments(prevComments => [...prevComments, newCommentData]);
+        setComments((prevComments) => [...prevComments, newCommentData]);
         setNewComment('');
+
+        // Ensure the modal stays open and no unnecessary re-renders occur
+        toast.success('Comment added successfully!');
       }
     } catch (error: any) {
+      toast.error('Failed to add comment');
       console.error('Failed to add comment:', error.response?.data || error.message);
     }
   };
@@ -649,7 +684,7 @@ export default function SubProjectView() {
           taskId: taskId,
           text: comment.message,
           userId: comment.userName, // Changed to userName instead of userId
-          createdAt: new Date().toISOString()
+          createdAt: comment.createdAt.toString()
         }));
         setComments(fetchedComments);
       }
@@ -660,19 +695,41 @@ export default function SubProjectView() {
     }
   };
 
-  const handleDeleteTask = (taskId: string, columnId: string) => {
-    const updatedColumns = columns.map(column => {
-      if (column.id === columnId) {
-        return {
-          ...column,
-          tasks: column.tasks.filter(task => task.id !== taskId)
-        };
-      }
-      return column;
-    });
+  const handleDeleteTask = async (taskId: string, columnId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(
+        `http://localhost:8085/api/task/delete/${taskId}`,
+        {}, // Ensure the body is empty if not required
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
 
-    setColumns(updatedColumns);
+      const updatedColumns = columns.map(column => {
+        if (column.id === columnId) {
+          return {
+            ...column,
+            tasks: column.tasks.filter(task => task.id !== taskId)
+          };
+        }
+        return column;
+      });
+
+      setColumns(updatedColumns);
+      toast.success('Task deleted successfully!');
+    } catch (error: any) {
+      toast.error('Failed to delete task');
+      console.error('Failed to delete task:', error.response?.data || error.message);
+    }
   };
+
+  // Fetch the current logged-in user's name
+  const storedUser = localStorage.getItem('user');
+  const currentUserName = storedUser ? JSON.parse(storedUser).name : 'Unknown User';
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -682,42 +739,36 @@ export default function SubProjectView() {
         </div>
         
         <main className="flex-1 overflow-x-hidden flex flex-col">
-          <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-0">
-            <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-semibold text-[#172B4D]">
+          <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-1 shadow-sm">
+            <div className="flex items-center gap-6">
+              <h1 className="text-3xl font-bold text-[#172B4D] tracking-wide">
                 Board
               </h1>
               <div className="h-6 w-px bg-gray-300"></div>
               <div className="relative">
                 <button
                   onClick={() => setShowMembersModal(!showMembersModal)}
-                  className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 px-2 py-1 rounded"
+                  className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-all"
                 >
-                  <Users className="w-4 h-4" />
+                  <Users className="w-5 h-5" />
                   <span>Members</span>
                 </button>
-
                 {/* Members Dropdown */}
                 {showMembersModal && (
                   <>
-                    <div 
-                      className="fixed inset-0" 
-                      onClick={() => setShowMembersModal(false)}
-                    />
-                    <div 
-                      className="absolute z-50 bg-white rounded-lg shadow-xl w-[320px] max-h-[400px] flex flex-col border border-gray-200 mt-1 left-0"
-                    >
-                      <div className="p-3 border-b border-gray-200">
-                        <h2 className="text-sm font-semibold text-gray-900">Board Members</h2>
+                    <div className="fixed inset-0" onClick={() => setShowMembersModal(false)} />
+                    <div className="absolute z-50 bg-white rounded-lg shadow-lg w-[320px] max-h-[400px] flex flex-col border border-gray-200 mt-2 left-0">
+                      <div className="p-4 border-b border-gray-200">
+                        <h2 className="text-lg font-semibold text-gray-900">Board Members</h2>
                       </div>
-                      <div className="overflow-y-auto p-2">
-                        <div className="space-y-2">
+                      <div className="overflow-y-auto p-3">
+                        <div className="space-y-3">
                           {members.map(member => (
-                            <div 
-                              key={member.id} 
-                              className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-md"
+                            <div
+                              key={member.id}
+                              className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-lg transition-all"
                             >
-                              <div className="w-7 h-7 bg-indigo-100 rounded-full flex items-center justify-center">
+                              <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
                                 <span className="text-sm font-medium text-indigo-600">
                                   {member.name.charAt(0)}
                                 </span>
@@ -740,8 +791,7 @@ export default function SubProjectView() {
                 )}
               </div>
             </div>
-            
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               {userRole === 'ADMIN' && (
                 <>
                   <div className="relative">
@@ -752,43 +802,31 @@ export default function SubProjectView() {
                       <Plus className="w-4 h-4" />
                       Add Column
                     </button>
-                    
-                    {/* Add Column Dropdown */}
                     {showAddColumnModal && (
                       <>
-                        <div 
-                          className="fixed inset-0" 
-                          onClick={() => setShowAddColumnModal(false)}
-                        />
-                        <div className="absolute right-0 z-50 bg-white rounded-lg shadow-xl w-[320px] border border-gray-200 mt-1">
-                          <div className="p-3 border-b border-gray-200">
-                            <h2 className="text-sm font-semibold text-gray-900">Add New Column</h2>
-                          </div>
+                        <div className="fixed inset-0" onClick={() => setShowAddColumnModal(false)} />
+                        <div className="absolute z-50 bg-white rounded-lg shadow-lg w-[320px] border border-gray-200 mt-2 right-0">
                           <div className="p-4">
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Column Name
-                              </label>
-                              <input
-                                type="text"
-                                placeholder="Enter column name"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900"
-                                value={newColumnName}
-                                onChange={(e) => setNewColumnName(e.target.value)}
-                              />
-                            </div>
-                            <div className="flex justify-end gap-2 mt-4">
+                            <h2 className="text-lg font-bold mb-4">Add New Column</h2>
+                            <input
+                              type="text"
+                              placeholder="Enter column name"
+                              value={newColumnName}
+                              onChange={(e) => setNewColumnName(e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded mb-4"
+                            />
+                            <div className="flex justify-end gap-2">
                               <button
                                 onClick={() => setShowAddColumnModal(false)}
-                                className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
+                                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
                               >
                                 Cancel
                               </button>
                               <button
                                 onClick={handleAddColumn}
-                                className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                                className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
                               >
-                                Add Column
+                                Add
                               </button>
                             </div>
                           </div>
@@ -804,109 +842,93 @@ export default function SubProjectView() {
                     >
                       Add Member
                     </button>
-
-                    {/* Add Member Dropdown */}
                     {showAddMemberModal && (
                       <>
-                        <div 
-                          className="fixed inset-0" 
-                          onClick={() => setShowAddMemberModal(false)}
-                        />
-                        <div className="absolute right-0 z-50 bg-white rounded-lg shadow-xl w-[400px] border border-gray-200 mt-1">
-                          <div className="p-3 border-b border-gray-200">
-                            <h2 className="text-sm font-semibold text-gray-900">Add New Member</h2>
-                          </div>
+                        <div className="fixed inset-0" onClick={() => setShowAddMemberModal(false)} />
+                        <div className="absolute z-50 bg-white rounded-lg shadow-lg w-[320px] border border-gray-200 mt-2 right-0">
                           <div className="p-4">
-                            <div className="mb-4">
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Select Member
-                              </label>
+                            <h2 className="text-lg font-bold mb-4">Add New Member</h2>
+                            <div className="space-y-3">
+                              {/* Member Dropdown */}
                               <div className="relative">
-                                <div 
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 cursor-pointer flex justify-between items-center"
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Select Member</label>
+                                <button
                                   onClick={() => setIsMemberDropdownOpen(!isMemberDropdownOpen)}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded text-left"
                                 >
-                                  <span>
-                                    {selectedMember ? orgMembers.find(m => m.id === selectedMember)?.name : 'Select a member'}
-                                  </span>
-                                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                  </svg>
-                                </div>
+                                  {selectedMember
+                                    ? orgMembers.find((member) => member.id === selectedMember)?.name || 'Select Member'
+                                    : 'Select Member'}
+                                </button>
                                 {isMemberDropdownOpen && (
-                                  <div className="absolute w-full bg-white border border-gray-200 rounded-md mt-1 shadow-lg z-[60] max-h-48 overflow-y-auto">
-                                    {orgMembers.map(member => (
+                                  <div className="absolute z-50 bg-white border border-gray-300 rounded mt-1 max-h-40 overflow-y-auto w-full">
+                                    {orgMembers.map((member) => (
                                       <div
                                         key={member.id}
-                                        className="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0"
                                         onClick={() => {
                                           setSelectedMember(member.id);
                                           setIsMemberDropdownOpen(false);
                                         }}
+                                        className="flex items-center gap-4 p-3 cursor-pointer hover:bg-gray-50"
                                       >
-                                        <div className="font-medium text-gray-900">{member.name}</div>
-                                        <div className="text-sm text-gray-500">{member.email}</div>
+                                        <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                                          <span className="text-sm font-medium text-indigo-600">
+                                            {member.name.charAt(0)}
+                                          </span>
+                                        </div>
+                                        <div>
+                                          <p className="text-sm font-medium text-gray-900">{member.name}</p>
+                                          <p className="text-xs text-gray-500">{member.email}</p>
+                                        </div>
                                       </div>
                                     ))}
                                   </div>
                                 )}
                               </div>
-                            </div>
 
-                            <div className="mb-4">
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Role
-                              </label>
+                              {/* Role Dropdown */}
                               <div className="relative">
-                                <div 
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 cursor-pointer flex justify-between items-center"
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Select Role</label>
+                                <button
                                   onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded text-left"
                                 >
-                                  <span>
-                                    {selectedRole ? roles.find(r => r.id === selectedRole)?.name : 'Select a role'}
-                                  </span>
-                                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                  </svg>
-                                </div>
+                                  {selectedRole
+                                    ? roles.find((role) => role.id === selectedRole)?.name || 'Select Role'
+                                    : 'Select Role'}
+                                </button>
                                 {isRoleDropdownOpen && (
-                                  <div className="absolute w-full bg-white border border-gray-200 rounded-md mt-1 shadow-lg z-[60] max-h-48 overflow-y-auto">
-                                    {roles.map(role => (
+                                  <div className="absolute z-50 bg-white border border-gray-300 rounded mt-1 max-h-40 overflow-y-auto w-full">
+                                    {roles.map((role) => (
                                       <div
                                         key={role.id}
-                                        className="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0"
                                         onClick={() => {
                                           setSelectedRole(role.id);
                                           setIsRoleDropdownOpen(false);
                                         }}
+                                        className="p-3 cursor-pointer hover:bg-gray-50"
                                       >
-                                        <div className="font-medium text-gray-900">{role.name}</div>
-                                        <div className="text-sm text-gray-500">{role.description}</div>
+                                        <p className="text-sm font-medium text-gray-900">{role.name}</p>
+                                        <p className="text-xs text-gray-500">{role.description}</p>
                                       </div>
                                     ))}
                                   </div>
                                 )}
                               </div>
                             </div>
-
-                            {addMemberError && (
-                              <p className="text-sm text-red-600 mb-2">{addMemberError}</p>
-                            )}
-
-                            <div className="flex justify-end gap-2 mt-6">
+                            {addMemberError && <p className="text-red-500 text-sm mt-4">{addMemberError}</p>}
+                            <div className="flex justify-end gap-2 mt-4">
                               <button
                                 onClick={() => setShowAddMemberModal(false)}
                                 className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
-                                disabled={isAddingMember}
                               >
                                 Cancel
                               </button>
                               <button
                                 onClick={handleAddMember}
-                                disabled={isAddingMember || !selectedMember || !selectedRole}
-                                className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+                                className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
                               >
-                                {isAddingMember ? 'Adding...' : 'Add Member'}
+                                Add
                               </button>
                             </div>
                           </div>
@@ -938,95 +960,90 @@ export default function SubProjectView() {
                 )}
               </div>
             ) : (
-              <div className="flex gap-4 min-w-max">
+              <div className="flex gap-6 min-w-max">
                 {columns.map(column => (
                   <Droppable key={column.id} droppableId={column.id}>
                     {(provided) => (
                       <div
                         ref={provided.innerRef}
                         {...provided.droppableProps}
-                        className="w-[280px] flex-shrink-0"
+                        className="w-[300px] flex-shrink-0 bg-white rounded-lg shadow-lg p-4"
                       >
-                        <div className="bg-[#F4F5F7] rounded-sm">
-                          <div className="px-3 py-2 flex justify-between items-center">
-                            <h3 className="font-medium text-[#172B4D] text-sm">
-                              {column.name}
-                              <span className="ml-2 text-gray-500">
-                                {column.tasks.length}
-                              </span>
-                            </h3>
-                            <button
-                              onClick={() => {
-                                setShowTaskModal(true);
-                                setIsEditMode(true); // Only set to true for new tasks
-                                setNewTask(prev => ({ ...prev, columnId: column.id }));
-                              }}
-                              className="text-gray-500 hover:text-gray-700"
-                            >
-                              <Plus className="w-4 h-4" />
-                            </button>
-                          </div>
-
-                          <div className="px-2 pb-2">
-                            <div className="space-y-2 min-h-[2px]">
-                              {column.tasks.map((task, index) => (
-                                <Draggable key={task.id} draggableId={task.id} index={index}>
-                                  {(provided) => (
-                                    <div
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      {...provided.dragHandleProps}
-                                      className="bg-white rounded shadow-sm p-3 cursor-pointer hover:bg-gray-50 border border-transparent hover:border-[#0052CC]"
-                                      onClick={() => {
-                                        setNewTask({
-                                          ...task,
-                                          columnId: column.id
-                                        });
-                                        setIsEditMode(false); // Set to false initially when opening modal
-                                        setShowTaskModal(true);
-                                        fetchTaskComments(task.id); // Fetch comments for the task
-                                      }}
-                                    >
-                                      <div className="flex justify-between items-start mb-2">
-                                        <span className="font-medium text-[#172B4D]">{task.title}</span>
-                                      </div>
-
-                                      {task.description && (
-                                        <p className="text-gray-600 text-xs truncate mb-2">
-                                          {task.description}
-                                        </p>
-                                      )}
-
-                                      <div className="flex items-center gap-2 flex-wrap">
-                                        {task.assignee.name ? (
-                                          <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-blue-100 text-blue-700">
-                                            {task.assignee.name}
-                                          </span>
-                                        ) : (
-                                          <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-700">
-                                            Unassigned
-                                          </span>
-                                        )}
-
-                                        <div className={`px-2 py-0.5 rounded-full text-[11px] font-medium ${
-                                          task.priority === 'HIGH' ? 'bg-red-100 text-red-700' :
-                                          task.priority === 'MEDIUM' ? 'bg-orange-100 text-orange-700' :
-                                          'bg-green-100 text-green-700'
-                                        }`}>
-                                          {task.priority}
-                                        </div>
-
-                                        <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-purple-100 text-purple-700">
-                                          {column.name}
-                                        </span>
-                                      </div>
-                                    </div>
+                        <div className="flex justify-between items-center mb-4">
+                          <h3 className="font-bold text-lg text-[#172B4D] tracking-wide">
+                            {column.name.toUpperCase()}
+                            <span className="ml-2 text-gray-500 text-sm">
+                              ({column.tasks.length})
+                            </span>
+                          </h3>
+                          <button
+                            onClick={() => {
+                              setShowTaskModal(true);
+                              setIsEditMode(true);
+                              setNewTask(prev => ({ ...prev, columnId: column.id }));
+                            }}
+                            className="text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 p-2 rounded-full transition-all"
+                          >
+                            <Plus className="w-5 h-5" />
+                          </button>
+                        </div>
+                        <div className="space-y-3">
+                          {column.tasks.map((task, index) => (
+                            <Draggable key={task.id} draggableId={task.id} index={index}>
+                              {(provided) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  className="bg-sky-100 rounded-lg shadow-sm p-4 hover:bg-sky-200 border border-transparent hover:border-blue-600 transition-all cursor-pointer"
+                                  onClick={() => {
+                                    setNewTask({
+                                      ...task,
+                                      columnId: column.id,
+                                    });
+                                    setIsEditMode(false);
+                                    setShowTaskModal(true);
+                                    fetchTaskComments(task.id);
+                                  }}
+                                >
+                                  <div className="flex justify-between items-start mb-2">
+                                    <span className="font-medium text-[#172B4D] text-sm">{task.title}</span>
+                                  </div>
+                                  {task.description && (
+                                    <p className="text-gray-600 text-xs truncate mb-2">
+                                      {task.description}
+                                    </p>
                                   )}
-                                </Draggable>
-                              ))}
-                              {provided.placeholder}
-                            </div>
-                          </div>
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    {task.assignee.name ? (
+                                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                                        {task.assignee.name}
+                                      </span>
+                                    ) : (
+                                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                        Unassigned
+                                      </span>
+                                    )}
+                                    <div
+                                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                        task.priority === 'HIGH'
+                                          ? 'bg-red-100 text-red-700'
+                                          : task.priority === 'MEDIUM'
+                                          ? 'bg-orange-100 text-orange-700'
+                                          : 'bg-green-100 text-green-700'
+                                      }`}
+                                    >
+                                      {task.priority}
+                                    </div>
+                                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                                      {column.name}
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
                         </div>
                       </div>
                     )}
@@ -1131,27 +1148,52 @@ export default function SubProjectView() {
                     Assignee
                   </label>
                   {isEditMode ? (
-                    <select
-                      className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg text-gray-900"
-                      value={newTask.assignee.id}
-                      onChange={(e) => setNewTask({ 
-                        ...newTask, 
-                        assignee: { 
-                          id: e.target.value,
-                          name: members.find(m => m.id === e.target.value)?.name || ''
-                        } 
-                      })}
-                    >
-                      <option value="">Select assignee</option>
-                      {members.map(member => (
-                        <option key={member.id} value={member.id}>
-                          {member.name}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="relative">
+                      <button
+                        onClick={() => setIsMemberDropdownOpen(!isMemberDropdownOpen)}
+                        className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg text-left"
+                      >
+                        {newTask.assignee.id
+                          ? `${members.find((member) => member.id === newTask.assignee.id)?.name || 'Select Assignee'} - ${
+                              members.find((member) => member.id === newTask.assignee.id)?.projectRole || 'No Role'
+                            }`
+                          : 'Select Assignee'}
+                      </button>
+                      {isMemberDropdownOpen && (
+                        <div className="absolute z-50 bg-white border border-gray-300 rounded mt-1 max-h-40 overflow-y-auto w-full">
+                          {members.map((member) => (
+                            <div
+                              key={member.id}
+                              onClick={() => {
+                                setNewTask({
+                                  ...newTask,
+                                  assignee: { id: member.id, name: member.name },
+                                });
+                                setIsMemberDropdownOpen(false);
+                              }}
+                              className="flex items-center gap-4 p-3 cursor-pointer hover:bg-gray-50"
+                            >
+                              <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                                <span className="text-sm font-medium text-indigo-600">
+                                  {member.name.charAt(0)}
+                                </span>
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">{member.name}</p>
+                                <p className="text-xs text-gray-500">{member.projectRole || 'No Role'}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     <div className="px-4 py-3 text-base bg-gray-50 rounded-lg text-gray-900">
-                      {newTask.assignee.name || 'Unassigned'}
+                      {newTask.assignee.name
+                        ? `${newTask.assignee.name} - ${
+                            members.find((member) => member.id === newTask.assignee.id)?.projectRole || 'No Role'
+                          }`
+                        : 'Unassigned'}
                     </div>
                   )}
                 </div>
@@ -1283,13 +1325,13 @@ export default function SubProjectView() {
                               <div key={comment.id} className="flex gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
                                 <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                                   <span className="text-sm font-medium text-blue-600">
-                                    {comment.userId.charAt(0)}
+                                    {comment.userId ? comment.userId.charAt(0) : currentUserName.charAt(0)}
                                   </span>
                                 </div>
                                 <div className="flex-1">
                                   <div className="flex justify-between items-start">
                                     <span className="text-sm font-medium text-gray-900">
-                                      {comment.userId}
+                                      {comment.userId || currentUserName}
                                     </span>
                                     <span className="text-xs text-gray-500">
                                       {new Date(comment.createdAt).toLocaleDateString(undefined, {
