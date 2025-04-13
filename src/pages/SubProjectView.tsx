@@ -18,6 +18,7 @@ interface Task {
   priority: string;
   status: string;
   columnId?: string;
+  ticketId?: string; // Add ticketId to Task interface
 }
 
 interface Column {
@@ -211,7 +212,8 @@ export default function SubProjectView() {
                 id: task.assignedUser?.id || '',
                 name: task.assignedUser?.name || ''
               },
-              columnId: column.id
+              columnId: column.id,
+              ticketId: task.ticketId // Ensure ticketId is set from the task object
             }))
         }));
 
@@ -461,7 +463,8 @@ export default function SubProjectView() {
                   id: createdTask.assignedUser.id,
                   name: createdTask.assignedUser.name
                 },
-                columnId
+                columnId,
+                ticketId: createdTask.ticketId // Ensure ticketId is set from the task object
               }]
             };
           }
@@ -512,7 +515,8 @@ export default function SubProjectView() {
   const handleEditTask = (task: Task, columnId: string) => {
     setNewTask({
       ...task,
-      columnId
+      columnId,
+      ticketId: task.ticketId // Ensure ticketId is set from the task object
     });
     setIsEditMode(true);
     setShowTaskModal(true);
@@ -1059,9 +1063,17 @@ export default function SubProjectView() {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center p-4">
             <div className="bg-white rounded-lg p-6 w-full max-w-[1000px] h-[92vh] overflow-y-auto mt-4">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {!newTask.id ? 'Create Task' : 'Task Details'}
-                </h2>
+                <div className="flex items-center gap-3">
+                  {/* Display ticketId */}
+                  {newTask.ticketId && (
+                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-sky-100 text-sky-800">
+                      Ticket ID: {newTask.ticketId}
+                    </span>
+                  )}
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    {!newTask.id ? 'Create Task' : ''}
+                  </h2>
+                </div>
                 <div className="flex items-center gap-3">
                   {newTask.id && (
                     <>
@@ -1110,7 +1122,7 @@ export default function SubProjectView() {
               {/* Task Title */}
               <div className="mb-6">
                 <label className="block text-base font-medium text-gray-700 mb-2">
-                  Task Name{isEditMode && '*'}
+                  Title{isEditMode && '*'}
                 </label>
                 <input
                   type="text"
@@ -1300,7 +1312,7 @@ export default function SubProjectView() {
                             : 'text-gray-500 hover:text-gray-700'
                         }`}
                       >
-                        History
+                        Activity logs
                       </button>
                     </div>
                   </div>

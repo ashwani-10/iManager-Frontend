@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import { Plus } from 'lucide-react';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 interface Project {
   projectId: string;
@@ -14,6 +15,12 @@ interface SubProject {
   id: string;
   name: string;
   members?: string[]; // Make members optional
+}
+
+interface Repository {
+  id: string;
+  name: string;
+  description: string;
 }
 
 export default function ProjectView() {
@@ -29,6 +36,8 @@ export default function ProjectView() {
   const [page, setPage] = useState(1);
   const [limit] = useState(9); // Show 9 items per page
   const [hasMore, setHasMore] = useState(true);
+  const [repositories, setRepositories] = useState<string[]>([]); // Update to store a list of strings
+  const [selectedRepository, setSelectedRepository] = useState<string | null>(null);
 
   // Load user role and project data from localStorage
   useEffect(() => {
@@ -89,9 +98,35 @@ export default function ProjectView() {
     fetchSubProjects();
   }, [projectId, page, limit]);
 
+  // Fetch repositories on page load
+  useEffect(() => {
+    const fetchRepositories = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('Authentication token not found');
+
+        const response = await axios.get('http://localhost:8085/api/github/repos', {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        if (Array.isArray(response.data)) {
+          console.log('Fetched repositories:', response.data);
+          setRepositories(response.data); // Store the list of strings
+        } else {
+          console.error('Invalid response format');
+        }
+      } catch (error) {
+        console.error('Error fetching repositories:', error);
+        toast.error('Failed to load repositories');
+      }
+    };
+
+    fetchRepositories();
+  }, []);
+
   const handleCreateSubProject = async () => {
-    if (!newSubProjectName.trim() || !projectId) {
-      setError('Please provide a valid sub-project name');
+    if (!newSubProjectName.trim() || !projectId || !selectedRepository) {
+      setError('Please provide a valid sub-project name and select a repository');
       return;
     }
     setIsLoading(true);
@@ -105,7 +140,11 @@ export default function ProjectView() {
 
       const response = await axios.post(
         'http://localhost:8085/api/subProject/create',
-        { name: newSubProjectName, projectId },
+        { 
+          name: newSubProjectName, 
+          projectId, 
+          repoName: selectedRepository // Include the selected repository name
+        },
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -129,6 +168,7 @@ export default function ProjectView() {
       localStorage.setItem(`subProjects_${projectId}`, JSON.stringify(updatedSubProjects));
       setShowNewSubProjectModal(false);
       setNewSubProjectName('');
+      setSelectedRepository(null); // Reset the selected repository
     } catch (error: any) {
       console.error('Failed to create sub-project:', error);
       setError(error.message || 'Failed to create sub-project. Please try again.');
@@ -159,6 +199,10 @@ export default function ProjectView() {
     }
   };
 
+  const handleRepositoryChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedRepository(event.target.value);
+  };
+
   // Memoize subprojects grid to prevent unnecessary re-renders
   const SubProjectsGrid = useMemo(() => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -173,7 +217,7 @@ export default function ProjectView() {
         <>
           {subProjects.map(subProject => (
             <div
-              key={subProject.id}
+              key={subProject.id} // Ensure unique key for each subproject
               className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition"
             >
               <h3 className="text-lg font-semibold text-gray-900 mb-2 font-inter leading-tight ">{subProject.name}</h3>
@@ -218,13 +262,62 @@ export default function ProjectView() {
             <div className="h-1 w-24 bg-indigo-600 rounded-full"></div>
           </div>
           {userRole === 'ADMIN' && (
-            <button
-              onClick={() => setShowNewSubProjectModal(true)}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition flex items-center gap-2 font-inter"
-            >
-              <Plus className="w-5 h-5" />
-              New Sub-Project
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => setShowNewSubProjectModal((prev) => !prev)}
+                className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition flex items-center gap-2 font-inter"
+              >
+                <Plus className="w-5 h-5" />
+                New Sub-Project
+              </button>
+              {showNewSubProjectModal && (
+                <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg p-6 z-10">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4 font-inter">Create New Sub-Project</h2>
+                  <input
+                    type="text"
+                    placeholder="Sub-Project Name"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 mb-4 font-inter"
+                    value={newSubProjectName}
+                    onChange={(e) => setNewSubProjectName(e.target.value)}
+                  />
+                  {/* Repository Dropdown */}
+                  <label htmlFor="repository-select" className="block text-sm font-medium text-gray-700 font-inter mb-2">
+                    Select Repository
+                  </label>
+                  <select
+                    id="repository-select"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 mb-4 font-inter"
+                    value={selectedRepository || ''}
+                    onChange={handleRepositoryChange}
+                  >
+                    <option value="" disabled>Select a repository</option>
+                    {repositories.map((repoName, index) => (
+                      <option key={index} value={repoName}>
+                        {repoName}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={() => setShowNewSubProjectModal(false)}
+                      className="px-4 py-2 text-gray-600 hover:text-gray-800 font-inter"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleCreateSubProject}
+                      disabled={!newSubProjectName.trim() || isLoading || !selectedRepository}
+                      className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-inter"
+                    >
+                      {isLoading ? 'Creating...' : 'Create'}
+                    </button>
+                  </div>
+                  {error && (
+                    <p className="text-red-500 text-sm mt-2 font-inter">{error}</p>
+                  )}
+                </div>
+              )}
+            </div>
           )}
         </div>
 
@@ -239,39 +332,6 @@ export default function ProjectView() {
           </div>
         ) : (
           SubProjectsGrid
-        )}
-
-        {showNewSubProjectModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white rounded-lg p-6 w-96">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 font-inter">Create New Sub-Project</h2>
-              <input
-                type="text"
-                placeholder="Sub-Project Name"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 mb-4 font-inter"
-                value={newSubProjectName}
-                onChange={(e) => setNewSubProjectName(e.target.value)}
-              />
-              <div className="flex justify-end gap-2">
-                <button
-                  onClick={() => setShowNewSubProjectModal(false)}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 font-inter"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleCreateSubProject}
-                  disabled={!newSubProjectName.trim() || isLoading}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-inter"
-                >
-                  {isLoading ? 'Creating...' : 'Create'}
-                </button>
-              </div>
-              {error && (
-                <p className="text-red-500 text-sm mt-2 font-inter">{error}</p>
-              )}
-            </div>
-          </div>
         )}
       </main>
     </div>
