@@ -117,7 +117,6 @@ export default function ProjectView() {
         }
       } catch (error) {
         console.error('Error fetching repositories:', error);
-        toast.error('Failed to load repositories');
       }
     };
 
@@ -125,8 +124,8 @@ export default function ProjectView() {
   }, []);
 
   const handleCreateSubProject = async () => {
-    if (!newSubProjectName.trim() || !projectId || !selectedRepository) {
-      setError('Please provide a valid sub-project name and select a repository');
+    if (!newSubProjectName.trim()) { // Remove repository validation
+      setError('Please provide a valid sub-project name');
       return;
     }
     setIsLoading(true);
@@ -143,7 +142,7 @@ export default function ProjectView() {
         { 
           name: newSubProjectName, 
           projectId, 
-          repoName: selectedRepository // Include the selected repository name
+          repoName: selectedRepository || null // Allow null for repoName
         },
         {
           headers: {
@@ -290,7 +289,7 @@ export default function ProjectView() {
                     value={selectedRepository || ''}
                     onChange={handleRepositoryChange}
                   >
-                    <option value="" disabled>Select a repository</option>
+                    <option value="">No repository</option> {/* Add default option for no repository */}
                     {repositories.map((repoName, index) => (
                       <option key={index} value={repoName}>
                         {repoName}
@@ -306,7 +305,7 @@ export default function ProjectView() {
                     </button>
                     <button
                       onClick={handleCreateSubProject}
-                      disabled={!newSubProjectName.trim() || isLoading || !selectedRepository}
+                      disabled={!newSubProjectName.trim() || isLoading} // Remove repository validation
                       className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-inter"
                     >
                       {isLoading ? 'Creating...' : 'Create'}
