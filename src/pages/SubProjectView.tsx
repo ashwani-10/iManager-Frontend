@@ -1149,6 +1149,12 @@ export default function SubProjectView() {
                                   className="bg-sky-100 rounded-lg shadow-sm p-4 hover:bg-sky-200 border border-transparent hover:border-blue-600 transition-all cursor-pointer"
                                   onClick={() => handleTaskClick(task, column.id)} // Use the updated handler
                                 >
+                                  {/* Display ticketId */}
+                                  {task.ticketId && (
+                                    <div className="text-xs font-bold text-blue-700 mb-1">
+                                      Ticket ID: {task.ticketId}
+                                    </div>
+                                  )}
                                   <div className="flex justify-between items-start mb-2">
                                     <span className="font-medium text-[#172B4D] text-sm">{task.title}</span>
                                   </div>
