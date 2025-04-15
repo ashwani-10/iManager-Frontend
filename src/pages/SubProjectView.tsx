@@ -95,7 +95,7 @@ export default function SubProjectView() {
 
   // Add new state for history tab and history data
   const [activeTab, setActiveTab] = useState<'comments' | 'history' | 'pullRequests'>('comments');
-  const [taskHistory] = useState([
+  const [taskHistory, setTaskHistory] = useState([
     {
       id: '1',
       action: 'Status changed',
@@ -533,7 +533,7 @@ export default function SubProjectView() {
     setShowTaskModal(true);
   };
 
-  const handleUpdateTask = (columnId: string) => {
+  const handleUpdateTask = async (columnId: string) => {
     const updatedColumns = columns.map(column => ({
       ...column,
       tasks: column.tasks.map(task => 
@@ -553,6 +553,32 @@ export default function SubProjectView() {
       columnId: ''
     });
     setIsEditMode(false);
+
+    // Persist the task update in the database
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(
+        `http://localhost:8085/api/task/update`,
+        {
+          id: newTask.id,
+          statusId: columnId,
+          assignedUser: newTask.assignee.id,
+          priority: newTask.priority,
+          title: newTask.title,
+          description: newTask.description,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      toast.success('Task updated successfully!');
+    } catch (error: any) {
+      toast.error('Failed to update task');
+      console.error('Failed to update task:', error.response?.data || error.message);
+    }
   };
 
   const onDragEnd = async (result: any) => {
@@ -784,6 +810,35 @@ export default function SubProjectView() {
     }
   }, [newTask.id]);
 
+  const fetchTaskHistory = async (ticketId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(
+        `http://localhost:8085/api/task/history/${ticketId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      console.log('Task history response:', response.data); // Debug log
+      if (response.data) {
+        const fetchedHistory = response.data.map((item: any) => ({
+          id: item.id || crypto.randomUUID(),
+          action: item.historyMessage,
+          userId: item.userName, // Use userName from the response
+          timestamp: item.timestamp || new Date().toISOString()
+        }));
+        setTaskHistory(fetchedHistory);
+      }
+    } catch (error: any) {
+      console.error('Failed to fetch task history:', error.response?.data || error.message);
+      setTaskHistory([]); // Clear history if the API call fails
+    }
+  };
+
   // Update the onClick handler for tasks to include fetching pull requests
   const handleTaskClick = async (task: Task, columnId: string) => {
     setNewTask({
@@ -793,6 +848,10 @@ export default function SubProjectView() {
     setIsEditMode(false);
     setShowTaskModal(true);
   
+    if (task.ticketId) {
+      await fetchTaskHistory(task.ticketId); // Fetch task history using ticketId
+    }
+
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
@@ -1055,7 +1114,7 @@ export default function SubProjectView() {
               <div className="flex gap-6 min-w-max">
                 {columns.map(column => (
                   <Droppable key={column.id} droppableId={column.id}>
-                    {(provided) => (
+                    {(provided = { innerRef: () => {}, droppableProps: {}, placeholder: null }) => (
                       <div
                         ref={provided.innerRef}
                         {...provided.droppableProps}
@@ -1146,7 +1205,7 @@ export default function SubProjectView() {
                 <div className="flex items-center gap-3">
                   {/* Display ticketId */}
                   {newTask.ticketId && (
-                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-sky-100 text-sky-800">
+                    <span className="px-3 py-1 rounded-full text-sm font-medium bg-sky-100 text-sky-800">
                       Ticket ID: {newTask.ticketId}
                     </span>
                   )}
@@ -1403,7 +1462,7 @@ export default function SubProjectView() {
                             : 'text-gray-500 hover:text-gray-700'
                         }`}
                       >
-                        Pull Requests
+                        Pull Request
                       </button>
                     </div>
                   </div>
@@ -1485,7 +1544,7 @@ export default function SubProjectView() {
                             <div className="flex justify-between items-start">
                               <div>
                                 <span className="text-sm font-medium text-gray-900">
-                                  {members.find(m => m.id === item.userId)?.name || 'Unknown User'}
+                                  {members.find(m => m.id === item.userId)?.name || item.userId || 'Unknown User'}
                                 </span>
                                 <p className="text-sm text-gray-600 mt-1">
                                   {item.action}
@@ -1526,7 +1585,7 @@ export default function SubProjectView() {
                             <th className="px-4 py-2 text-sm font-medium text-gray-700">Title</th>
                             <th className="px-4 py-2 text-sm font-medium text-gray-700">URL</th>
                             <th className="px-4 py-2 text-sm font-medium text-gray-700">Base Branch</th>
-                            <th className="px-4 py-2 text-sm font-medium text-gray-700">Target Branch</th>
+                            <th className="px-4 py-2 text-sm font-medium text-gray-700">Head Branch</th>
                             <th className="px-4 py-2 text-sm font-medium text-gray-700">State</th>
                           </tr>
                         </thead>
