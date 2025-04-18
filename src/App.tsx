@@ -12,7 +12,7 @@ import { ToastContainer } from 'react-toastify';
 function App() {
   return (
     <UserProvider>
-      <Router>
+      <Router future={{ v7_startTransition: true }}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />

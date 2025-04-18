@@ -1,9 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface User {
-  id: any;
+  id: string;
   email: string;
-  // ...other user properties
+  name: string;
+  role: 'ADMIN' | 'MEMBER';
+  orgName?: string;
+  orgId?: string;
 }
 
 interface UserContextType {

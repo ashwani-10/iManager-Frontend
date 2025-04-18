@@ -28,7 +28,7 @@ export const InviteModal: React.FC<InviteModalProps> = ({ isOpen, onClose }) => 
     try {
       const response = await axios({
         method: 'POST',
-        url: `http://localhost:8085/api/member/invite/${user.id}`,
+        url: `http://43.204.115.57:8085/api/member/invite/${user.id}`,
         params: { inviteEmail, role: inviteRole },
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
