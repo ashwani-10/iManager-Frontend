@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { Plus, X, Edit2, Users, Clock, AlertCircle } from 'lucide-react';
+import { Plus, X, Edit2, Users, Clock, AlertCircle, UserPlus, User, ChevronDown } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -30,6 +30,7 @@ interface Column {
 interface Member {
   id: string;
   name: string;
+  email?: string; // Add email to Member interface
   projectRole?: string;  // Only keep projectRole
 }
 
@@ -130,6 +131,28 @@ export default function SubProjectView() {
     state: string;
   }[]>([]);
 
+  const [searchMember, setSearchMember] = useState('');
+  const [searchOrgMember, setSearchOrgMember] = useState('');
+
+  // Add this state for controlling member list visibility
+  const [isSearching, setIsSearching] = useState(false);
+
+  // Add click outside handler
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isSearching) {
+        const dropdown = document.getElementById('member-dropdown');
+        if (dropdown && !dropdown.contains(event.target as Node)) {
+          setIsSearching(false);
+          setSearchOrgMember('');
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isSearching]);
+
   useEffect(() => {
     const storedRoles = localStorage.getItem('roles');
     if (storedRoles) {
@@ -152,7 +175,7 @@ export default function SubProjectView() {
 
       // First fetch columns
       const columnsResponse = await axios.get(
-        `http://localhost:8085/api/status/get/${subProjectId}`,
+        `http://43.204.115.57:8085/api/status/get/${subProjectId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -193,7 +216,7 @@ export default function SubProjectView() {
 
       // Then fetch tasks
       const tasksResponse = await axios.get(
-        `http://localhost:8085/api/task/get/${subProjectId}`,
+        `http://43.204.115.57:8085/api/task/get/${subProjectId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -259,7 +282,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `http://localhost:8085/api/member/subProject/${subProjectId}`,
+        `http://43.204.115.57:8085/api/member/subProject/${subProjectId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -290,8 +313,8 @@ export default function SubProjectView() {
 
         // Make parallel API calls
         const [membersResponse, rolesResponse] = await Promise.all([
-          axios.get(`http://localhost:8085/api/member/get/${userRole === 'ADMIN' ? userId : ''}`, { headers }),
-          axios.get(`http://localhost:8085/api/role/get/${userRole === 'ADMIN' ? userId : ''}`, { headers })
+          axios.get(`http://43.204.115.57:8085/api/member/get/${userRole === 'ADMIN' ? userId : ''}`, { headers }),
+          axios.get(`http://43.204.115.57:8085/api/role/get/${userRole === 'ADMIN' ? userId : ''}`, { headers })
         ]);
 
         if (membersResponse.data) {
@@ -344,7 +367,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        `http://localhost:8085/api/member/add/role/${subProjectId}/${selectedMember}/${selectedRole}`,
+        `http://43.204.115.57:8085/api/member/add/role/${subProjectId}/${selectedMember}/${selectedRole}`,
         {},  // empty body
         {
           headers: {
@@ -393,7 +416,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        `http://localhost:8085/api/status/create/${subProjectId}/${newColumnName}`,
+        `http://43.204.115.57:8085/api/status/create/${subProjectId}/${newColumnName}`,
         {},  // empty body since data is in path variables
         {
           headers: {
@@ -447,7 +470,7 @@ export default function SubProjectView() {
       };
 
       const response = await axios.post(
-        'http://localhost:8085/api/task/create',
+        'http://43.204.115.57:8085/api/task/create',
         payload,
         {
           headers: {
@@ -558,7 +581,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       await axios.put(
-        `http://localhost:8085/api/task/update`,
+        `http://43.204.115.57:8085/api/task/update`,
         {
           id: newTask.id,
           statusId: columnId,
@@ -634,7 +657,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       await axios.put(
-        `http://localhost:8085/api/task/update`,
+        `http://43.204.115.57:8085/api/task/update`,
         {
           id: movedTask.id,
           statusId: destination.droppableId,
@@ -671,7 +694,7 @@ export default function SubProjectView() {
       }
 
       const response = await axios.post(
-        `http://localhost:8085/api/comment/create/${newTask.id}`,
+        `http://43.204.115.57:8085/api/comment/create/${newTask.id}`,
         {
           message: newComment,
           user_id: userId
@@ -710,7 +733,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `http://localhost:8085/api/comment/get/${taskId}`,
+        `http://43.204.115.57:8085/api/comment/get/${taskId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -741,7 +764,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `http://localhost:8085/api/pull-requests/get/${taskId}`,
+        `http://43.204.115.57:8085/api/pull-requests/get/${taskId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -770,7 +793,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `http://localhost:8085/api/task/delete/${taskId}`,
+        `http://43.204.115.57:8085/api/task/delete/${taskId}`,
         {}, // Ensure the body is empty if not required
         {
           headers: {
@@ -814,7 +837,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `http://localhost:8085/api/task/history/${ticketId}`,
+        `http://43.204.115.57:8085/api/task/history/${ticketId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -855,7 +878,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `http://localhost:8085/api/github/get/pr/${task.ticketId}`,
+        `http://43.204.115.57:8085/api/github/get/pr/${task.ticketId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -882,58 +905,102 @@ export default function SubProjectView() {
     }
   };
 
+  // Add this helper function
+  const filterMembers = (members: Member[]) => {
+    return members.filter(
+      member => 
+        member.name.toLowerCase().includes(searchMember.toLowerCase()) ||
+        (member.email && member.email.toLowerCase().includes(searchMember.toLowerCase()))
+    );
+  };
+
+  // Add this helper function near other filter functions
+  const filterOrgMembers = (orgMembers: OrgMember[]) => {
+    return orgMembers.filter(
+      member => 
+        member.name.toLowerCase().includes(searchOrgMember.toLowerCase()) ||
+        member.email.toLowerCase().includes(searchOrgMember.toLowerCase())
+    );
+  };
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="flex h-screen overflow-hidden bg-[#F4F5F7]">
-        <div className="h-full bg-[#1A1B1E] text-white">
-          <Sidebar />
-        </div>
+        <Sidebar />
         
-        <main className="flex-1 overflow-x-hidden flex flex-col">
-          <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-1 shadow-sm">
+        <main className="flex-1 overflow-x-hidden flex flex-col animate-fadeIn">
+          <div className="px-8 py-4 flex items-center justify-between sticky top-0 z-40">
             <div className="flex items-center gap-6">
-              <h1 className="text-3xl font-bold text-[#172B4D] tracking-wide">
+              <h1 className="text-3xl font-bold text-[#3e3e3e] tracking-wide hover:text-blue-600 transition-colors">
                 Board
               </h1>
               <div className="h-6 w-px bg-gray-300"></div>
               <div className="relative">
                 <button
                   onClick={() => setShowMembersModal(!showMembersModal)}
-                  className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-all"
+                  className="flex items-center gap-2 text-sm text-gray-700 border border-gray-300 hover:border-gray-400 px-3 py-2 rounded-lg bg-white hover:bg-gray-50 transition-all shadow-sm hover:shadow-md"
+                  title="View Members"
                 >
-                  <Users className="w-5 h-5" />
+                  <img
+                    src="https://img.icons8.com/color/48/000000/conference-call.png" 
+                    alt="Members Icon"
+                    className="w-5 h-5"
+                  />
                   <span>Members</span>
                 </button>
                 {/* Members Dropdown */}
                 {showMembersModal && (
                   <>
                     <div className="fixed inset-0" onClick={() => setShowMembersModal(false)} />
-                    <div className="absolute z-50 bg-white rounded-lg shadow-lg w-[320px] max-h-[400px] flex flex-col border border-gray-200 mt-2 left-0">
-                      <div className="p-4 border-b border-gray-200">
-                        <h2 className="text-lg font-semibold text-gray-900">Board Members</h2>
+                    <div className="absolute z-50 bg-white rounded-lg shadow-lg w-[380px] max-h-[80vh] flex flex-col border border-gray-200 mt-2 left-0">
+                      <div className="p-4 border-b border-gray-200 sticky top-0 bg-white z-10">
+                        <h2 className="text-lg font-semibold text-gray-900 mb-3">Board Members</h2>
+                        <div className="relative">
+                          <input
+                            type="text"
+                            placeholder="Search by name or email..."
+                            value={searchMember}
+                            onChange={(e) => setSearchMember(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                          <div className="absolute right-3 top-2.5 text-gray-400">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                          </div>
+                        </div>
                       </div>
-                      <div className="overflow-y-auto p-3">
+                      <div className="overflow-y-auto flex-1 p-3">
                         <div className="space-y-3">
-                          {members.map(member => (
+                          {filterMembers(members).map(member => (
                             <div
                               key={member.id}
                               className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-lg transition-all"
                             >
-                              <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                              <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
                                 <span className="text-sm font-medium text-indigo-600">
                                   {member.name.charAt(0)}
                                 </span>
                               </div>
-                              <div>
-                                <p className="text-sm font-medium text-gray-900">{member.name}</p>
-                                <p className="text-xs text-gray-500">{member.projectRole}</p>
+                              <div className="min-w-0 flex-1">
+                                <p className="text-sm font-medium text-gray-900 truncate">
+                                  {member.name}
+                                </p>
+                                <p className="text-xs text-gray-500 truncate">
+                                  {member.email || 'No email'}
+                                </p>
+                                <p className="text-xs text-gray-400 mt-0.5">
+                                  {member.projectRole}
+                                </p>
                               </div>
                             </div>
                           ))}
-                          {members.length === 0 && (
-                            <p className="text-sm text-gray-500 text-center py-4">
-                              No members yet
-                            </p>
+                          {filterMembers(members).length === 0 && (
+                            <div className="text-center py-6">
+                              <p className="text-sm text-gray-500">
+                                {members.length === 0 ? 'No members yet' : 'No matching members found'}
+                              </p>
+                            </div>
                           )}
                         </div>
                       </div>
@@ -948,34 +1015,37 @@ export default function SubProjectView() {
                   <div className="relative">
                     <button
                       onClick={() => setShowAddColumnModal(!showAddColumnModal)}
-                      className="bg-[#0052CC] text-white px-3 py-1.5 text-sm rounded hover:bg-[#0065FF] transition-colors flex items-center gap-2"
+                      className="flex items-center gap-2 border border-[#0052CC] text-[#0052CC] px-4 py-2 text-sm font-medium rounded-lg hover:bg-[#DEEBFF] transition-all shadow-sm"
+                      title="Add Column"
                     >
                       <Plus className="w-4 h-4" />
                       Add Column
+                      <ChevronDown className="w-4 h-4" />
                     </button>
                     {showAddColumnModal && (
                       <>
                         <div className="fixed inset-0" onClick={() => setShowAddColumnModal(false)} />
-                        <div className="absolute z-50 bg-white rounded-lg shadow-lg w-[320px] border border-gray-200 mt-2 right-0">
+                        <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                           <div className="p-4">
-                            <h2 className="text-lg font-bold mb-4">Add New Column</h2>
+                            <h3 className="text-sm font-semibold text-gray-700 mb-3">Add New Column</h3>
                             <input
                               type="text"
                               placeholder="Enter column name"
                               value={newColumnName}
                               onChange={(e) => setNewColumnName(e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded mb-4"
+                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
-                            <div className="flex justify-end gap-2">
+                            <div className="flex justify-end gap-2 mt-4">
                               <button
                                 onClick={() => setShowAddColumnModal(false)}
-                                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
+                                className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
                               >
                                 Cancel
                               </button>
                               <button
                                 onClick={handleAddColumn}
-                                className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                                disabled={!newColumnName.trim()}
+                                className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                               >
                                 Add
                               </button>
@@ -989,96 +1059,160 @@ export default function SubProjectView() {
                   <div className="relative">
                     <button
                       onClick={() => setShowAddMemberModal(!showAddMemberModal)}
-                      className="border border-[#0052CC] text-[#0052CC] px-3 py-1.5 text-sm rounded hover:bg-[#DEEBFF] transition-colors"
+                      className="flex items-center gap-2 border border-[#0052CC] text-[#0052CC] px-4 py-2 text-sm font-medium rounded-lg hover:bg-[#DEEBFF] transition-all shadow-sm"
+                      title="Add Member"
                     >
+                      <UserPlus className="w-4 h-4" />
                       Add Member
+                      <ChevronDown className="w-4 h-4" />
                     </button>
                     {showAddMemberModal && (
                       <>
                         <div className="fixed inset-0" onClick={() => setShowAddMemberModal(false)} />
-                        <div className="absolute z-50 bg-white rounded-lg shadow-lg w-[320px] border border-gray-200 mt-2 right-0">
-                          <div className="p-4">
-                            <h2 className="text-lg font-bold mb-4">Add New Member</h2>
+                        <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-45">
+                          <div className="p-4 border-b border-gray-200">
+                            <h3 className="text-sm font-semibold text-gray-700 mb-3">Add New Member</h3>
                             <div className="space-y-3">
-                              {/* Member Dropdown */}
-                              <div className="relative">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Select Member</label>
-                                <button
-                                  onClick={() => setIsMemberDropdownOpen(!isMemberDropdownOpen)}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded text-left"
-                                >
-                                  {selectedMember
-                                    ? orgMembers.find((member) => member.id === selectedMember)?.name || 'Select Member'
-                                    : 'Select Member'}
-                                </button>
-                                {isMemberDropdownOpen && (
-                                  <div className="absolute z-50 bg-white border border-gray-300 rounded mt-1 max-h-40 overflow-y-auto w-full">
-                                    {orgMembers.map((member) => (
-                                      <div
-                                        key={member.id}
-                                        onClick={() => {
-                                          setSelectedMember(member.id);
-                                          setIsMemberDropdownOpen(false);
-                                        }}
-                                        className="flex items-center gap-4 p-3 cursor-pointer hover:bg-gray-50"
-                                      >
-                                        <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
-                                          <span className="text-sm font-medium text-indigo-600">
-                                            {member.name.charAt(0)}
+                              <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Select Member</label>
+                                <div className="relative" id="member-dropdown">
+                                  {selectedMember ? (
+                                    <div className="w-full px-3 py-2 border border-gray-300 rounded-lg flex items-center justify-between">
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                          <span className="text-sm font-medium text-blue-600">
+                                            {orgMembers.find(m => m.id === selectedMember)?.name.charAt(0)}
                                           </span>
                                         </div>
-                                        <div>
-                                          <p className="text-sm font-medium text-gray-900">{member.name}</p>
-                                          <p className="text-xs text-gray-500">{member.email}</p>
+                                        <div className="flex flex-col">
+                                          <span className="text-sm text-gray-900">
+                                            {orgMembers.find(m => m.id === selectedMember)?.name}
+                                          </span>
+                                          <span className="text-xs text-gray-500">
+                                            {orgMembers.find(m => m.id === selectedMember)?.email}
+                                          </span>
                                         </div>
                                       </div>
-                                    ))}
-                                  </div>
-                                )}
+                                      <button
+                                        onClick={() => {
+                                          setSelectedMember('');
+                                          setSearchOrgMember('');
+                                        }}
+                                        className="text-gray-400 hover:text-gray-600"
+                                      >
+                                        <X className="w-4 h-4" />
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <div className="relative">
+                                      <input
+                                        type="text"
+                                        placeholder="Search by name or email..."
+                                        value={searchOrgMember}
+                                        onChange={(e) => {
+                                          setSearchOrgMember(e.target.value);
+                                          setIsSearching(true);
+                                        }}
+                                        onFocus={() => setIsSearching(true)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
+                                      <div className="absolute right-3 top-2.5 text-gray-400">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                      </div>
+                                    </div>
+                                  )}
+                                  
+                                  {isSearching && !selectedMember && (
+                                    <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                      {filterOrgMembers(orgMembers).map(member => (
+                                        <div
+                                          key={member.id}
+                                          onClick={() => {
+                                            setSelectedMember(member.id);
+                                            setIsSearching(false);
+                                            setSearchOrgMember('');
+                                          }}
+                                          className="flex items-center gap-3 p-2 hover:bg-gray-50 cursor-pointer"
+                                        >
+                                          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                                            <span className="text-sm font-medium text-blue-600">
+                                              {member.name.charAt(0)}
+                                            </span>
+                                          </div>
+                                          <div className="min-w-0 flex-1">
+                                            <p className="text-sm font-medium text-gray-900 truncate">
+                                              {member.name}
+                                            </p>
+                                            <p className="text-xs text-gray-500 truncate">
+                                              {member.email}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      ))}
+                                      {filterOrgMembers(orgMembers).length === 0 && (
+                                        <div className="text-center py-4">
+                                          <p className="text-sm text-gray-500">No matching members found</p>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
                               </div>
 
-                              {/* Role Dropdown */}
-                              <div className="relative">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Select Role</label>
-                                <button
-                                  onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded text-left"
-                                >
-                                  {selectedRole
-                                    ? roles.find((role) => role.id === selectedRole)?.name || 'Select Role'
-                                    : 'Select Role'}
-                                </button>
-                                {isRoleDropdownOpen && (
-                                  <div className="absolute z-50 bg-white border border-gray-300 rounded mt-1 max-h-40 overflow-y-auto w-full">
-                                    {roles.map((role) => (
-                                      <div
-                                        key={role.id}
-                                        onClick={() => {
-                                          setSelectedRole(role.id);
-                                          setIsRoleDropdownOpen(false);
-                                        }}
-                                        className="p-3 cursor-pointer hover:bg-gray-50"
-                                      >
-                                        <p className="text-sm font-medium text-gray-900">{role.name}</p>
-                                        <p className="text-xs text-gray-500">{role.description}</p>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
+                              <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Select Role</label>
+                                <div className="relative">
+                                  <button
+                                    onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
+                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded flex items-center justify-between"
+                                  >
+                                    {selectedRole
+                                      ? roles.find(r => r.id === selectedRole)?.name
+                                      : 'Select Role'}
+                                    <ChevronDown className="w-4 h-4 text-gray-500" />
+                                  </button>
+                                  {isRoleDropdownOpen && (
+                                    <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                      {roles.map(role => (
+                                        <div
+                                          key={role.id}
+                                          onClick={() => {
+                                            setSelectedRole(role.id);
+                                            setIsRoleDropdownOpen(false);
+                                          }}
+                                          className="px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                                        >
+                                          <p className="text-sm font-medium text-gray-700">{role.name}</p>
+                                          <p className="text-xs text-gray-500">{role.description}</p>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </div>
-                            {addMemberError && <p className="text-red-500 text-sm mt-4">{addMemberError}</p>}
+
+                            {addMemberError && (
+                              <p className="text-sm text-red-600 mt-2">{addMemberError}</p>
+                            )}
+
                             <div className="flex justify-end gap-2 mt-4">
                               <button
                                 onClick={() => setShowAddMemberModal(false)}
-                                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
+                                className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
                               >
                                 Cancel
                               </button>
                               <button
                                 onClick={handleAddMember}
-                                className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                                disabled={!selectedMember || !selectedRole || isAddingMember}
+                                className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
                               >
+                                {isAddingMember && (
+                                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                )}
                                 Add
                               </button>
                             </div>
@@ -1093,7 +1227,7 @@ export default function SubProjectView() {
           </div>
 
           {/* Board Content */}
-          <div className="flex-1 p-4 overflow-x-auto">
+          <div className="flex-1 p-6 overflow-x-auto">
             {isLoading ? (
               <div className="flex items-center justify-center h-full">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -1105,6 +1239,7 @@ export default function SubProjectView() {
                   <button
                     onClick={() => setShowAddColumnModal(true)}
                     className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                    title="Add Column"
                   >
                     Add Column
                   </button>
@@ -1114,78 +1249,96 @@ export default function SubProjectView() {
               <div className="flex gap-6 min-w-max">
                 {columns.map(column => (
                   <Droppable key={column.id} droppableId={column.id}>
-                    {(provided = { innerRef: () => {}, droppableProps: {}, placeholder: null }) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className="w-[300px] flex-shrink-0 bg-white rounded-lg shadow-lg p-4"
-                      >
-                        <div className="flex justify-between items-center mb-4">
-                          <h3 className="font-bold text-lg text-[#172B4D] tracking-wide">
-                            {column.name.toUpperCase()}
-                            <span className="ml-2 text-gray-500 text-sm">
-                              ({column.tasks.length})
+                    {(provided) => (
+                      <div className="w-[300px] flex-shrink-0">
+                        {/* Column Header Section */}
+                        <div className="bg-gradient-to-r from-blue-200 via-blue-200 to-blue-200 text-gray-800 p-4 rounded-lg shadow-lg flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <span className="text-lg font-bold uppercase tracking-wide">
+                              {column.name}
                             </span>
-                          </h3>
+                            <span className="text-sm bg-white text-blue-600 px-3 py-1 rounded-full shadow-md">
+                              {column.tasks.length}
+                            </span>
+                          </div>
                           <button
                             onClick={() => {
                               setShowTaskModal(true);
                               setIsEditMode(true);
                               setNewTask(prev => ({ ...prev, columnId: column.id }));
                             }}
-                            className="text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 p-2 rounded-full transition-all"
+                            className="bg-white text-blue-600 hover:bg-blue-100 p-2 rounded-full shadow-md transition-all"
+                            title="Add Task"
                           >
                             <Plus className="w-5 h-5" />
                           </button>
                         </div>
-                        <div className="space-y-3">
+
+                        {/* Add spacing between header and tasks */}
+                        <div className="h-4"></div>
+
+                        {/* Tasks Section */}
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                          className="space-y-3 min-h-[350px]"
+                        >
                           {column.tasks.map((task, index) => (
                             <Draggable key={task.id} draggableId={task.id} index={index}>
-                              {(provided) => (
+                              {(provided, snapshot) => (
                                 <div
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}
-                                  className="bg-sky-100 rounded-lg shadow-sm p-4 hover:bg-sky-200 border border-transparent hover:border-blue-600 transition-all cursor-pointer"
-                                  onClick={() => handleTaskClick(task, column.id)} // Use the updated handler
+                                  className={`bg-white rounded-md shadow-md p-3 border border-gray-300 hover:bg-gray-50 transition-all cursor-pointer ${
+                                    snapshot.isDragging ? 'transform scale-105 shadow-lg' : ''
+                                  }`}
+                                  onClick={() => handleTaskClick(task, column.id)}
                                 >
                                   {/* Display ticketId */}
                                   {task.ticketId && (
-                                    <div className="text-xs font-bold text-blue-700 mb-1">
-                                      Ticket ID: {task.ticketId}
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <div className="text-xs font-semibold text-blue-700 tracking-wide">
+                                        Ticket ID: {task.ticketId}
+                                      </div>
+                                      <div
+                                        className={`px-3 py-1 rounded-full text-xs font-medium tracking-wide ${
+                                          task.priority === 'HIGH'
+                                            ? 'bg-red-100 text-red-700'
+                                            : task.priority === 'MEDIUM'
+                                            ? 'bg-orange-100 text-orange-700'
+                                            : 'bg-green-100 text-green-700'
+                                        }`}
+                                      >
+                                        {task.priority}
+                                      </div>
                                     </div>
                                   )}
                                   <div className="flex justify-between items-start mb-2">
-                                    <span className="font-medium text-[#172B4D] text-sm">{task.title}</span>
+                                    <span className="font-semibold text-[#172B4D] text-sm leading-tight">
+                                      {task.title}
+                                    </span>
                                   </div>
                                   {task.description && (
-                                    <p className="text-gray-600 text-xs truncate mb-2">
-                                      {task.description}
+                                    <p className="text-gray-600 text-xs leading-relaxed mb-3">
+                                      {task.description.length > 40
+                                        ? `${task.description.substring(0, 40)}...`
+                                        : task.description}
                                     </p>
                                   )}
                                   <div className="flex items-center gap-2 flex-wrap">
                                     {task.assignee.name ? (
-                                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                                      <span className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 tracking-wide">
+                                        <User className="w-4 h-4" /> {/* Add human icon */}
                                         {task.assignee.name}
                                       </span>
                                     ) : (
-                                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 tracking-wide">
                                         Unassigned
                                       </span>
                                     )}
-                                    <div
-                                      className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                        task.priority === 'HIGH'
-                                          ? 'bg-red-100 text-red-700'
-                                          : task.priority === 'MEDIUM'
-                                          ? 'bg-orange-100 text-orange-700'
-                                          : 'bg-green-100 text-green-700'
-                                      }`}
-                                    >
-                                      {task.priority}
-                                    </div>
-                                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
-                                      {column.name}
+                                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700 tracking-wide">
+                                      {column.name.toUpperCase()}
                                     </span>
                                   </div>
                                 </div>
@@ -1205,17 +1358,17 @@ export default function SubProjectView() {
 
         {/* Updated Task Modal */}
         {showTaskModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center p-4">
-            <div className="bg-white rounded-lg p-6 w-full max-w-[1300px] h-[90vh] overflow-y-auto mt-4">
+          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-start justify-center p-4 z-50">
+            <div className="bg-white p-6 w-full max-w-[1100px] h-[85vh] overflow-y-auto mt-4 shadow-lg border border-gray-400">
               <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-3">
                   {/* Display ticketId */}
                   {newTask.ticketId && (
-                    <span className="px-3 py-1 rounded-full text-sm font-medium bg-sky-100 text-sky-800">
+                    <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
                       Ticket ID: {newTask.ticketId}
                     </span>
                   )}
-                  <h2 className="text-2xl font-bold text-gray-900">
+                  <h2 className="text-2xl font-bold text-gray-800">
                     {!newTask.id ? 'Create Task' : ''}
                   </h2>
                 </div>
@@ -1272,9 +1425,7 @@ export default function SubProjectView() {
                 <input
                   type="text"
                   placeholder="Enter task name"
-                  className={`w-full px-4 py-3 text-base border ${
-                    isEditMode ? 'border-gray-300' : 'border-transparent bg-gray-50'
-                  } rounded-lg text-gray-900`}
+                  className={`w-full px-4 py-3 text-base border border-gray-400 rounded-md text-gray-900 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none`}
                   value={newTask.title}
                   onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
                   readOnly={!isEditMode}
@@ -1289,9 +1440,7 @@ export default function SubProjectView() {
                 <textarea
                   placeholder="Enter task description"
                   rows={4}
-                  className={`w-full px-4 py-3 text-base border ${
-                    isEditMode ? 'border-gray-300' : 'border-transparent bg-gray-50'
-                  } rounded-lg text-gray-900 resize-none`}
+                  className={`w-full px-4 py-3 text-base border border-gray-400 rounded-md text-gray-900 resize-none shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none`}
                   value={newTask.description}
                   onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
                   readOnly={!isEditMode}
@@ -1308,7 +1457,7 @@ export default function SubProjectView() {
                     <div className="relative">
                       <button
                         onClick={() => setIsMemberDropdownOpen(!isMemberDropdownOpen)}
-                        className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg text-left"
+                        className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg text-left shadow-sm"
                       >
                         {newTask.assignee.id
                           ? `${members.find((member) => member.id === newTask.assignee.id)?.name || 'Select Assignee'} - ${
@@ -1317,7 +1466,7 @@ export default function SubProjectView() {
                           : 'Select Assignee'}
                       </button>
                       {isMemberDropdownOpen && (
-                        <div className="absolute z-50 bg-white border border-gray-300 rounded mt-1 max-h-40 overflow-y-auto w-full">
+                        <div className="absolute z-50 bg-white border border-gray-300 rounded mt-1 max-h-40 overflow-y-auto w-full shadow-lg">
                           {members.map((member) => (
                             <div
                               key={member.id}
@@ -1345,7 +1494,7 @@ export default function SubProjectView() {
                       )}
                     </div>
                   ) : (
-                    <div className="px-4 py-3 text-base bg-gray-50 rounded-lg text-gray-900">
+                    <div className="px-4 py-3 text-base bg-gray-50 rounded-lg text-gray-900 shadow-sm">
                       {newTask.assignee.name
                         ? `${newTask.assignee.name} - ${
                             members.find((member) => member.id === newTask.assignee.id)?.projectRole || 'No Role'
@@ -1362,20 +1511,20 @@ export default function SubProjectView() {
                   </label>
                   {isEditMode ? (
                     <select
-                      className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg text-gray-900"
+                      className="w-full px-4 py-3 text-base border border-gray-400 rounded-md text-gray-900 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
                       value={newTask.columnId}
                       onChange={(e) => setNewTask({ ...newTask, columnId: e.target.value })}
                     >
                       <option value="">Select status</option>
                       {columns.map(column => (
                         <option key={column.id} value={column.id}>
-                          {column.name}
+                          {column.name.toUpperCase()}
                         </option>
                       ))}
                     </select>
                   ) : (
-                    <div className="px-4 py-3 text-base bg-gray-50 rounded-lg text-gray-900">
-                      {columns.find(col => col.id === newTask.columnId)?.name || 'No status'}
+                    <div className="px-4 py-3 text-base bg-gray-50 rounded-lg text-gray-900 shadow-sm">
+                      {columns.find(col => col.id === newTask.columnId)?.name.toUpperCase() || 'NO STATUS'}
                     </div>
                   )}
                 </div>
@@ -1387,7 +1536,7 @@ export default function SubProjectView() {
                   </label>
                   {isEditMode ? (
                     <select
-                      className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg text-gray-900"
+                      className="w-full px-4 py-3 text-base border border-gray-400 rounded-md text-gray-900 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
                       value={newTask.priority}
                       onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
                     >
@@ -1396,7 +1545,7 @@ export default function SubProjectView() {
                       <option value="HIGH">High</option>
                     </select>
                   ) : (
-                    <div className={`px-4 py-3 rounded-lg ${getPriorityColor(newTask.priority)}`}>
+                    <div className={`px-4 py-3 rounded-lg shadow-sm ${getPriorityColor(newTask.priority)}`}>
                       {newTask.priority}
                     </div>
                   )}
@@ -1420,14 +1569,14 @@ export default function SubProjectView() {
                         columnId: ''
                       });
                     }}
-                    className="px-6 py-2.5 text-base text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg"
+                    className="px-6 py-2.5 text-base text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg shadow-sm"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={() => newTask.id ? handleUpdateTask(newTask.columnId) : handleAddTask(newTask.columnId)}
                     disabled={!newTask.title.trim() || !newTask.columnId}
-                    className="px-6 py-2.5 text-base bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    className="px-6 py-2.5 text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-sm"
                   >
                     {newTask.id ? 'Update Task' : 'Create Task'}
                   </button>
@@ -1490,7 +1639,7 @@ export default function SubProjectView() {
                           comments
                             .filter(comment => comment.taskId === newTask.id)
                             .map(comment => (
-                              <div key={comment.id} className="flex gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                              <div key={comment.id} className="flex gap-3 p-3 hover:bg-gray-50 rounded-lg">
                                 <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                                   <span className="text-sm font-medium text-blue-600">
                                     {comment.userId ? comment.userId.charAt(0) : currentUserName.charAt(0)}
@@ -1518,12 +1667,12 @@ export default function SubProjectView() {
                         )}
                       </div>
 
-                      {/* Comment Input - Moved to bottom */}
+                      {/* Comment Input */}
                       <div className="border-t border-gray-200 pt-4">
-                        <textarea 
+                        <textarea
                           placeholder="Write a comment..."
                           rows={3}
-                          className="w-full px-4 py-3 text-base border border-gray-200 rounded-lg text-gray-900 resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg text-gray-900 resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           value={newComment}
                           onChange={(e) => setNewComment(e.target.value)}
                         />
@@ -1539,10 +1688,12 @@ export default function SubProjectView() {
                       </div>
                     </>
                   ) : activeTab === 'history' ? (
-                    // History Tab Content
-                    <div className="space-y-4 max-h-[400px] overflow-y-auto">
+                    <div className="space-y-4 max-h-[400px] overflow-y-auto bg-white rounded-lg shadow-md p-4">
                       {taskHistory.map(item => (
-                        <div key={item.id} className="flex gap-3 items-start p-3 hover:bg-gray-50 rounded-lg">
+                        <div
+                          key={item.id}
+                          className="flex gap-3 items-start p-3 hover:bg-gray-50 rounded-lg border border-gray-200"
+                        >
                           <div className="flex-shrink-0 w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
                             <Clock className="w-4 h-4 text-purple-600" />
                           </div>
@@ -1584,37 +1735,49 @@ export default function SubProjectView() {
                     </div>
                   ) : (
                     <div className="space-y-4 max-h-[400px] overflow-y-auto">
-                      <table className="w-full text-left border-collapse">
-                        <thead>
+                      <table className="w-full text-left border-collapse bg-white rounded-lg shadow-md">
+                        <thead className="bg-gray-100">
                           <tr className="border-b border-gray-200">
-                            <th className="px-4 py-2 text-sm font-medium text-gray-700">Username</th>
-                            <th className="px-4 py-2 text-sm font-medium text-gray-700">Title</th>
-                            <th className="px-4 py-2 text-sm font-medium text-gray-700">URL</th>
-                            <th className="px-4 py-2 text-sm font-medium text-gray-700">Base Branch</th>
-                            <th className="px-4 py-2 text-sm font-medium text-gray-700">Head Branch</th>
-                            <th className="px-4 py-2 text-sm font-medium text-gray-700">State</th>
+                            <th className="px-4 py-3 text-sm font-semibold text-gray-700 uppercase tracking-wide">User</th>
+                            <th className="px-4 py-3 text-sm font-semibold text-gray-700 uppercase tracking-wide">Title</th>
+                            <th className="px-4 py-3 text-sm font-semibold text-gray-700 uppercase tracking-wide">URL</th>
+                            <th className="px-4 py-3 text-sm font-semibold text-gray-700 uppercase tracking-wide">Base Branch</th>
+                            <th className="px-4 py-3 text-sm font-semibold text-gray-700 uppercase tracking-wide">Head Branch</th>
+                            <th className="px-4 py-3 text-sm font-semibold text-gray-700 uppercase tracking-wide">State</th>
                           </tr>
                         </thead>
                         <tbody>
                           {pullRequests.length === 0 ? (
                             <tr>
-                              <td colSpan={6} className="px-4 py-2 text-sm text-gray-500 text-center">
+                              <td colSpan={6} className="px-4 py-6 text-sm text-gray-500 text-center">
                                 No pull requests available
                               </td>
                             </tr>
                           ) : (
                             pullRequests.map(pr => (
-                              <tr key={pr.id} className="border-b border-gray-200 hover:bg-gray-50">
-                                <td className="px-4 py-2 text-sm text-gray-900">{pr.username}</td>
-                                <td className="px-4 py-2 text-sm text-gray-900">{pr.title}</td>
-                                <td className="px-4 py-2 text-sm text-blue-600">
-                                  <a href={pr.url} target="_blank" rel="noopener noreferrer">
-                                    {pr.url} {/* Display the actual URL */}
+                              <tr key={pr.id} className="border-b border-gray-200 hover:bg-gray-50 transition-all">
+                                <td className="px-4 py-3 text-sm text-gray-900 font-medium">{pr.username}</td>
+                                <td className="px-4 py-3 text-sm text-gray-900 font-medium">{pr.title}</td>
+                                <td className="px-4 py-3 text-sm text-blue-600 font-medium">
+                                  <a href={pr.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                                    View PR
                                   </a>
                                 </td>
-                                <td className="px-4 py-2 text-sm text-gray-900">{pr.baseBranch}</td>
-                                <td className="px-4 py-2 text-sm text-gray-900">{pr.targetBranch}</td>
-                                <td className="px-4 py-2 text-sm text-gray-900">{pr.state}</td>
+                                <td className="px-4 py-3 text-sm text-gray-900">{pr.baseBranch}</td>
+                                <td className="px-4 py-3 text-sm text-gray-900">{pr.targetBranch}</td>
+                                <td className="px-4 py-3 text-sm">
+                                  <span
+                                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                      pr.state === 'open'
+                                        ? 'bg-green-100 text-green-800'
+                                        : pr.state === 'closed'
+                                        ? 'bg-red-100 text-red-800'
+                                        : 'bg-gray-100 text-gray-800'
+                                    }`}
+                                  >
+                                    {pr.state}
+                                  </span>
+                                </td>
                               </tr>
                             ))
                           )}
