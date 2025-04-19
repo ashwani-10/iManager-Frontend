@@ -62,7 +62,7 @@ export default function SignupPage() {
     };
 
     try {
-      const response = await axios.post(`http://13.60.94.65:8081/api/v1/org/registration?amount=${formData.planPrice}&currency=INR`, payload);
+      const response = await axios.post(`https://imanager.duckdns.org/api/v1/org/registration?amount=${formData.planPrice}&currency=INR`, payload);
 
       const order = response.data;
       
