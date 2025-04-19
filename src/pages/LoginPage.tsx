@@ -24,7 +24,7 @@ export default function LoginPage() {
 
     try {
       const response = await axios.post<Record<string, any>>(
-        'https://imanager.duckdns.org/api/v1/org/login',
+        'http://localhost:8081/api/v1/org/login',
         payload,
             {
       withCredentials: true,  // Ensure cookies and credentials are sent
