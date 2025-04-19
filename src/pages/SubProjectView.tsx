@@ -175,7 +175,7 @@ export default function SubProjectView() {
 
       // First fetch columns
       const columnsResponse = await axios.get(
-        `http://43.204.115.57:8085/api/status/get/${subProjectId}`,
+        `https://imanager2.duckdns.org/api/status/get/${subProjectId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -216,7 +216,7 @@ export default function SubProjectView() {
 
       // Then fetch tasks
       const tasksResponse = await axios.get(
-        `http://43.204.115.57:8085/api/task/get/${subProjectId}`,
+        `https://imanager2.duckdns.org/api/task/get/${subProjectId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -282,7 +282,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `http://43.204.115.57:8085/api/member/subProject/${subProjectId}`,
+        `https://imanager2.duckdns.org/api/member/subProject/${subProjectId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -313,8 +313,8 @@ export default function SubProjectView() {
 
         // Make parallel API calls
         const [membersResponse, rolesResponse] = await Promise.all([
-          axios.get(`http://43.204.115.57:8085/api/member/get/${userRole === 'ADMIN' ? userId : ''}`, { headers }),
-          axios.get(`http://43.204.115.57:8085/api/role/get/${userRole === 'ADMIN' ? userId : ''}`, { headers })
+          axios.get(`https://imanager2.duckdns.org/api/member/get/${userRole === 'ADMIN' ? userId : ''}`, { headers }),
+          axios.get(`https://imanager2.duckdns.org/api/role/get/${userRole === 'ADMIN' ? userId : ''}`, { headers })
         ]);
 
         if (membersResponse.data) {
@@ -367,7 +367,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        `http://43.204.115.57:8085/api/member/add/role/${subProjectId}/${selectedMember}/${selectedRole}`,
+        `https://imanager2.duckdns.org/api/member/add/role/${subProjectId}/${selectedMember}/${selectedRole}`,
         {},  // empty body
         {
           headers: {
@@ -416,7 +416,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        `http://43.204.115.57:8085/api/status/create/${subProjectId}/${newColumnName}`,
+        `https://imanager2.duckdns.org/api/status/create/${subProjectId}/${newColumnName}`,
         {},  // empty body since data is in path variables
         {
           headers: {
@@ -470,7 +470,7 @@ export default function SubProjectView() {
       };
 
       const response = await axios.post(
-        'http://43.204.115.57:8085/api/task/create',
+        'https://imanager2.duckdns.org/api/task/create',
         payload,
         {
           headers: {
@@ -581,7 +581,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       await axios.put(
-        `http://43.204.115.57:8085/api/task/update`,
+        `https://imanager2.duckdns.org/api/task/update`,
         {
           id: newTask.id,
           statusId: columnId,
@@ -657,7 +657,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       await axios.put(
-        `http://43.204.115.57:8085/api/task/update`,
+        `https://imanager2.duckdns.org/api/task/update`,
         {
           id: movedTask.id,
           statusId: destination.droppableId,
@@ -694,7 +694,7 @@ export default function SubProjectView() {
       }
 
       const response = await axios.post(
-        `http://43.204.115.57:8085/api/comment/create/${newTask.id}`,
+        `https://imanager2.duckdns.org/api/comment/create/${newTask.id}`,
         {
           message: newComment,
           user_id: userId
@@ -733,7 +733,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `http://43.204.115.57:8085/api/comment/get/${taskId}`,
+        `https://imanager2.duckdns.org/api/comment/get/${taskId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -764,7 +764,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `http://43.204.115.57:8085/api/pull-requests/get/${taskId}`,
+        `https://imanager2.duckdns.org/api/pull-requests/get/${taskId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -793,7 +793,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `http://43.204.115.57:8085/api/task/delete/${taskId}`,
+        `https://imanager2.duckdns.org/api/task/delete/${taskId}`,
         {}, // Ensure the body is empty if not required
         {
           headers: {
@@ -837,7 +837,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `http://43.204.115.57:8085/api/task/history/${ticketId}`,
+        `https://imanager2.duckdns.org/api/task/history/${ticketId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -878,7 +878,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `http://43.204.115.57:8085/api/github/get/pr/${task.ticketId}`,
+        `https://imanager2.duckdns.org/api/github/get/pr/${task.ticketId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
