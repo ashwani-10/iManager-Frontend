@@ -25,7 +25,13 @@ export default function LoginPage() {
     try {
       const response = await axios.post<Record<string, any>>(
         'https://imanager.duckdns.org/api/v1/org/login',
-        payload
+        payload,
+            {
+      withCredentials: true,  // Ensure cookies and credentials are sent
+      headers: {
+        'Content-Type': 'application/json',  // Make sure the content type is correct
+            }
+          }  
       );
 
       const token = response.data['token'];
