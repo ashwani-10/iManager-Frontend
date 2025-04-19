@@ -35,7 +35,7 @@ export default function Sidebar() {
       
       try {
         const loggedId = user?.role === 'ADMIN' ? user?.id : user?.orgId;
-        const response = await axios.get(`https://imanager2.duckdns.org/db/api/org/get/logo/${loggedId}`, {
+        const response = await axios.get(`https://imanager2.duckdns.org/api/service1/db/api/org/get/logo/${loggedId}`, {
         });
         if (response.data) {
           setCompanyLogo(response.data);
@@ -123,7 +123,7 @@ export default function Sidebar() {
         console.log('GitHub OAuth Code:', authCode);
   
         try {
-          const response = await axios.post('https://imanager2.duckdns.org/api/github/exchange', null, {
+          const response = await axios.post('https://imanager2.duckdns.org/api/service1/api/github/exchange', null, {
             params: { authCode, loggedId },
           });
           console.log('Token exchange response:', response.data);
