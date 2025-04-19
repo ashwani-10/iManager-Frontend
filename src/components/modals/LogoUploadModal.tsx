@@ -60,7 +60,7 @@ export const LogoUploadModal: React.FC<LogoUploadModalProps> = ({ isOpen, onClos
       const loggedId = user?.role === 'ADMIN' ? user?.id : user?.orgId;
       // Then send the Cloudinary URL to your backend
       const response = await axios.post(
-        `https://imanager2.duckdns.org/db/api/org/upload/logo/${loggedId}?logoUrl=${encodeURIComponent(cloudinaryUrl)}`,
+        `https://imanager2.duckdns.org/api/service1/db/api/org/upload/logo/${loggedId}?logoUrl=${encodeURIComponent(cloudinaryUrl)}`,
         {},
         {
           headers: {
