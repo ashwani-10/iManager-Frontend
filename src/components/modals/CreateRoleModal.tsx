@@ -79,7 +79,7 @@ export const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ isOpen, onClos
   useEffect(() => {
     const fetchOperations = async () => {
       try {
-        const response = await axios.get('https://imanager2.duckdns.org/api/operation/get', {
+        const response = await axios.get('https://imanager2.duckdns.org/api/service2/api/operation/get', {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
@@ -114,7 +114,7 @@ export const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ isOpen, onClos
     try {
       const response = await axios({
         method: 'POST',
-        url: 'https://imanager2.duckdns.org/api/role/create',
+        url: 'https://imanager2.duckdns.org/api/service2/api/role/create',
         data: {
           name: newRoleName,
           description: newRoleDescription,
