@@ -45,7 +45,7 @@ export default function Dashboard() {
 
       const idToUse = user?.role === 'ADMIN' ? user.id : user?.orgId;
       const response = await axios.get(
-        `http://43.204.115.57:8085/api/project/get/${idToUse}`,
+        `https://imanager2.duckdns.org/api/project/get/${idToUse}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           params: { page, limit }
@@ -95,7 +95,7 @@ export default function Dashboard() {
 
       console.log('Making API call to create project...');
       const response = await axios.post(
-        'http://43.204.115.57:8085/api/project/create',
+        'https://imanager2.duckdns.org/api/project/create',
         { 
           name: newProjectName.trim(), 
           orgId
