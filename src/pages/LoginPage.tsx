@@ -24,10 +24,9 @@ export default function LoginPage() {
 
     try {
       const response = await axios.post<Record<string, any>>(
-        'http://localhost:8081/api/v1/org/login',
+        'http://13.60.94.65:8081/api/v1/org/login',
         payload,
-            {
-      withCredentials: true,  // Ensure cookies and credentials are sent
+            { // Ensure cookies and credentials are sent
       headers: {
         'Content-Type': 'application/json',  // Make sure the content type is correct
             }
