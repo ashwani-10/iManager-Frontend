@@ -47,8 +47,7 @@ export default function Dashboard() {
       const response = await axios.get(
         `https://imanager2.duckdns.org/api/service2/api/project/get/${idToUse}`,
         {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { page, limit }
+          headers: { Authorization: `Bearer ${token}` }
         }
       );
 
