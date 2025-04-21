@@ -283,11 +283,13 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#FAFBFC]">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 bg-[#000000] shadow-lg z-50 opacity-90">
+      <nav className="fixed top-0 left-0 right-0 bg-[#000000] shadow-lg z-50 opacity-85">
         <div className="container mx-auto px-6 h-16 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 bg-white/10 backdrop-blur-sm rounded-lg">
-              <Layout className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 bg-[#0052CC] rounded-lg flex items-center justify-center">
+              <svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 16L14 22L24 10" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </div>
             <h1 className="text-xl font-bold text-white cursor-pointer" onClick={() => navigate('/')}>
               iManager
@@ -305,8 +307,8 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <ScrollReveal type="fade-up" delay={200}>
-        <div className="container mx-auto px-6 pt-32 pb-16">
-          <div className="max-w-4xl mx-auto text-center">
+        <div className="container mx-auto px-6 pt-24 pb-12">
+          <div className="max-w-5xl mx-auto text-center bg-gradient-to-br from-white to-slate-50 rounded-3xl p-10 shadow-xl">
             <h1 className="text-5xl font-bold text-[#172B4D] mb-8 leading-tight">
               Manage Projects with{' '}
               <span className="text-[#0052CC]">Confidence</span>
@@ -328,16 +330,16 @@ export default function LandingPage() {
             </div>
             
             {/* Added Stats Bar */}
-            <div className="mt-16 grid grid-cols-3 gap-8 p-6 bg-white rounded-lg shadow-lg">
-              <div className="text-center">
+            <div className="mt-16 grid grid-cols-3 gap-8 p-6 bg-white rounded-xl shadow-lg">
+              <div className="text-center p-4 hover:bg-slate-50 rounded-lg transition-colors">
                 <div className="text-3xl font-bold text-[#0052CC]">10k+</div>
                 <div className="text-sm text-[#172B4D]">Active Users</div>
               </div>
-              <div className="text-center">
+              <div className="text-center p-4 hover:bg-slate-50 rounded-lg transition-colors">
                 <div className="text-3xl font-bold text-[#0052CC]">99.9%</div>
                 <div className="text-sm text-[#172B4D]">Uptime</div>
               </div>
-              <div className="text-center">
+              <div className="text-center p-4 hover:bg-slate-50 rounded-lg transition-colors">
                 <div className="text-3xl font-bold text-[#0052CC]">24/7</div>
                 <div className="text-sm text-[#172B4D]">Support</div>
               </div>
@@ -348,8 +350,8 @@ export default function LandingPage() {
 
       {/* Integrations Section */}
       <ScrollReveal type="fade-left" delay={200}>
-        <div className="container mx-auto px-6 py-12">
-          <div className="text-center">
+        <div className="container mx-auto px-6 py-10">
+          <div className="max-w-5xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#171B21] rounded-full mb-8">
               <GitBranch className="w-5 h-5 text-white" />
               <span className="text-white text-sm font-medium">Native GitHub Integration</span>
@@ -386,8 +388,8 @@ export default function LandingPage() {
 
       {/* App Info Section */}
       <ScrollReveal type="fade-right" delay={200}>
-        <div className="container mx-auto px-6 py-12">
-          <div className="text-center">
+        <div className="container mx-auto px-6 py-10">
+          <div className="max-w-5xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#171B21] rounded-full mb-8">
               <PenTool className="w-5 h-5 text-white" />
               <span className="text-white text-sm font-medium">Smart Task Management</span>
@@ -428,16 +430,16 @@ export default function LandingPage() {
 
       {/* Pricing Section */}
       <ScrollReveal type="fade-up" delay={200} staggerChildren>
-        <div className="container mx-auto px-6 py-12">
-          <div className="text-center">
+        <div className="container mx-auto px-6 py-10">
+          <div className="max-w-5xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#171B21] rounded-full mb-8">
               <Shield className="w-5 h-5 text-white" />
               <span className="text-white text-sm font-medium">Flexible Plans</span>
             </div>
-            <h2 className="text-3xl font-bold text-[#172B4D] mb-16">
+            <h2 className="text-3xl font-bold text-[#172B4D] mb-14">
               Choose Your <span className="text-[#0052CC]">Perfect Plan</span>
             </h2>
-            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-3 gap-8">
               {plans.map((plan) => (
                 <div key={plan.name} 
                   className={`relative bg-white rounded-lg p-8 border border-slate-200 hover:border-[#0052CC]/50 transition-all duration-200 hover:-translate-y-1 ${
@@ -490,8 +492,8 @@ export default function LandingPage() {
 
       {/* Feature Preview */}
       <ScrollReveal type="zoom-in" delay={200}>
-        <div className="container mx-auto px-6 py-12">
-          <div className="text-center">
+        <div className="container mx-auto px-6 py-10">
+          <div className="max-w-5xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#171B21] rounded-full mb-8">
               <Layout className="w-5 h-5 text-white" />
               <span className="text-white text-sm font-medium">Dashboard Preview</span>
@@ -523,16 +525,16 @@ export default function LandingPage() {
 
       {/* Features Section */}
       <ScrollReveal type="fade-up" delay={200} staggerChildren>
-        <div className="container mx-auto px-6 py-12">
-          <div className="text-center">
+        <div className="container mx-auto px-6 py-10">
+          <div className="max-w-5xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#171B21] rounded-full mb-8">
               <Zap className="w-5 h-5 text-white" />
               <span className="text-white text-sm font-medium">Why Choose Us</span>
             </div>
-            <h2 className="text-3xl font-bold text-[#172B4D] mb-16">
+            <h2 className="text-3xl font-bold text-[#172B4D] mb-14">
               Features you'll <span className="text-[#0052CC]">love</span>
             </h2>
-            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-3 gap-8">
               {features.map((feature, index) => (
                 <div key={index} className="group p-8 rounded-lg bg-white border border-slate-200 hover:border-[#0052CC]/50 shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-1">
                   <div className="w-12 h-12 rounded-xl bg-[#171B21] flex items-center justify-center mb-6">
@@ -555,8 +557,10 @@ export default function LandingPage() {
         <div className="container mx-auto px-6">
           <div className="max-w-6xl mx-auto">
             <div className="flex items-center justify-center gap-3 mb-12">
-              <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center">
-                <Layout className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 bg-[#0052CC] rounded-xl flex items-center justify-center shadow-lg">
+                <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 16L14 22L24 10" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </div>
               <h3 className="text-2xl font-bold text-white">iManager</h3>
             </div>
