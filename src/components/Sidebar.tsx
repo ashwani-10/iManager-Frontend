@@ -101,7 +101,7 @@ export default function Sidebar() {
 
   const GithubConnect = () => {
     const clientId = 'Ov23liUmjGMOVyaqSahe'; // GitHub se liya hua
-    const redirectUri = 'http://localhost:5173/dashboard'; // Tera redirect URL
+    const redirectUri = 'https://imanager.vercel.app/dashboard'; // Tera redirect URL
   
     const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=repo user`;
 
