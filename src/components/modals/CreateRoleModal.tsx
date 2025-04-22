@@ -3,6 +3,8 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useUser } from '../../context/userContext';
 
+const API_PT_URL = import.meta.env.VITE_IMANAGER_PT_API;
+
 // Modal Component
 interface ModalProps {
   isOpen: boolean;
@@ -79,7 +81,7 @@ export const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ isOpen, onClos
   useEffect(() => {
     const fetchOperations = async () => {
       try {
-        const response = await axios.get('https://imanager2.duckdns.org/api/service2/api/operation/get', {
+        const response = await axios.get(`${API_PT_URL}/api/operation/get`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
@@ -114,7 +116,7 @@ export const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ isOpen, onClos
     try {
       const response = await axios({
         method: 'POST',
-        url: 'https://imanager2.duckdns.org/api/service2/api/role/create',
+        url: `${API_PT_URL}/api/role/create`,
         data: {
           name: newRoleName,
           description: newRoleDescription,

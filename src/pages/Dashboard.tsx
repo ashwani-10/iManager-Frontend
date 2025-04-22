@@ -6,6 +6,8 @@ import { useUser } from '../context/userContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
+const API_PT_URL = import.meta.env.VITE_IMANAGER_PT_API;
+
 interface Project {
   id: string;
   name: string;
@@ -45,7 +47,7 @@ export default function Dashboard() {
 
       const idToUse = user?.role === 'ADMIN' ? user.id : user?.orgId;
       const response = await axios.get(
-        `https://imanager2.duckdns.org/api/service2/api/project/get/${idToUse}`,
+        `${API_PT_URL}/api/project/get/${idToUse}`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
@@ -94,7 +96,7 @@ export default function Dashboard() {
 
       console.log('Making API call to create project...');
       const response = await axios.post(
-        'https://imanager2.duckdns.org/api/service2/api/project/create',
+        `${API_PT_URL}/api/project/create`,
         { 
           name: newProjectName.trim(), 
           orgId

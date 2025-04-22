@@ -5,6 +5,8 @@ import { toast } from 'react-toastify';
 import { useUser } from '../context/userContext';
 import ScrollReveal from '../components/ScrollReveal';
 
+const API_MAIN_URL = import.meta.env.VITE_IMANAGER_MAIN_API;
+
 export default function LoginPage() {
   const navigate = useNavigate();
   const { setUser } = useUser();
@@ -24,7 +26,7 @@ export default function LoginPage() {
 
     try {
       const response = await axios.post<Record<string, any>>(
-        'https://imanager.duckdns.org/api/v1/org/login',
+        `${API_MAIN_URL}/api/v1/org/login`,
         payload,
             { // Ensure cookies and credentials are sent
       headers: {

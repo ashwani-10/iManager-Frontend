@@ -6,6 +6,7 @@ import Sidebar from '../components/Sidebar';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
+const API_PT_URL = import.meta.env.VITE_IMANAGER_PT_API;
 // Add these interfaces at the top
 interface Task {
   id: string;
@@ -75,7 +76,8 @@ export default function SubProjectView() {
     assignee: { id: '', name: '' },
     priority: 'MEDIUM',
     status: '',
-    columnId: ''
+    columnId: '',
+    ticketId: '' // Initialize ticketId
   });
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState('');
@@ -175,7 +177,7 @@ export default function SubProjectView() {
 
       // First fetch columns
       const columnsResponse = await axios.get(
-        `https://imanager2.duckdns.org/api/service2/api/status/get/${subProjectId}`,
+        `${API_PT_URL}/api/status/get/${subProjectId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -216,7 +218,7 @@ export default function SubProjectView() {
 
       // Then fetch tasks
       const tasksResponse = await axios.get(
-        `https://imanager2.duckdns.org/api/service2/api/task/get/${subProjectId}`,
+        `${API_PT_URL}/api/task/get/${subProjectId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -282,7 +284,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `https://imanager2.duckdns.org/api/service2/api/member/subProject/${subProjectId}`,
+        `${API_PT_URL}/api/member/subProject/${subProjectId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -313,8 +315,8 @@ export default function SubProjectView() {
 
         // Make parallel API calls
         const [membersResponse, rolesResponse] = await Promise.all([
-          axios.get(`https://imanager2.duckdns.org/api/service2/api/member/get/${userRole === 'ADMIN' ? userId : ''}`, { headers }),
-          axios.get(`https://imanager2.duckdns.org/api/service2/api/role/get/${userRole === 'ADMIN' ? userId : ''}`, { headers })
+          axios.get(`${API_PT_URL}/api/member/get/${userRole === 'ADMIN' ? userId : ''}`, { headers }),
+          axios.get(`${API_PT_URL}/api/role/get/${userRole === 'ADMIN' ? userId : ''}`, { headers })
         ]);
 
         if (membersResponse.data) {
@@ -367,7 +369,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        `https://imanager2.duckdns.org/api/service2/api/member/add/role/${subProjectId}/${selectedMember}/${selectedRole}`,
+        `${API_PT_URL}/api/member/add/role/${subProjectId}/${selectedMember}/${selectedRole}`,
         {},  // empty body
         {
           headers: {
@@ -416,7 +418,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        `https://imanager2.duckdns.org/api/service2/api/status/create/${subProjectId}/${newColumnName}`,
+        `${API_PT_URL}/api/status/create/${subProjectId}/${newColumnName}`,
         {},  // empty body since data is in path variables
         {
           headers: {
@@ -470,7 +472,7 @@ export default function SubProjectView() {
       };
 
       const response = await axios.post(
-        'https://imanager2.duckdns.org/api/service2/api/task/create',
+        `${API_PT_URL}/api/task/create`,
         payload,
         {
           headers: {
@@ -523,7 +525,8 @@ export default function SubProjectView() {
           assignee: { id: '', name: '' },
           priority: 'MEDIUM',
           status: '',
-          columnId: ''
+          columnId: '',
+          ticketId: '' // Reset ticketId
         });
       }
       toast.success('Task created successfully!');
@@ -573,7 +576,8 @@ export default function SubProjectView() {
       assignee: { id: '', name: '' },
       priority: 'MEDIUM',
       status: '',
-      columnId: ''
+      columnId: '',
+      ticketId: '' // Reset ticketId
     });
     setIsEditMode(false);
 
@@ -581,7 +585,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       await axios.put(
-        `https://imanager2.duckdns.org/api/service2/api/task/update`,
+        `${API_PT_URL}/api/task/update`,
         {
           id: newTask.id,
           statusId: columnId,
@@ -657,7 +661,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       await axios.put(
-        `https://imanager2.duckdns.org/api/service2/api/task/update`,
+        `${API_PT_URL}/api/task/update`,
         {
           id: movedTask.id,
           statusId: destination.droppableId,
@@ -694,7 +698,7 @@ export default function SubProjectView() {
       }
 
       const response = await axios.post(
-        `https://imanager2.duckdns.org/api/service2/api/comment/create/${newTask.id}`,
+        `${API_PT_URL}/api/comment/create/${newTask.id}`,
         {
           message: newComment,
           user_id: userId
@@ -733,7 +737,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `https://imanager2.duckdns.org/api/service2/api/comment/get/${taskId}`,
+        `${API_PT_URL}/api/comment/get/${taskId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -764,7 +768,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `https://imanager2.duckdns.org/api/service2/api/pull-requests/get/${taskId}`,
+        `${API_PT_URL}/api/pull-requests/get/${taskId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -793,7 +797,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `https://imanager2.duckdns.org/api/service2/api/task/delete/${taskId}`,
+        `${API_PT_URL}/api/task/delete/${taskId}`,
         {}, // Ensure the body is empty if not required
         {
           headers: {
@@ -837,7 +841,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `https://imanager2.duckdns.org/api/service2/api/task/history/${ticketId}`,
+        `${API_PT_URL}/api/task/history/${ticketId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -878,7 +882,7 @@ export default function SubProjectView() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `https://imanager2.duckdns.org/api/service2/api/github/get/pr/${task.ticketId}`,
+        `${API_PT_URL}/api/github/get/pr/${task.ticketId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -1407,7 +1411,8 @@ export default function SubProjectView() {
                         assignee: { id: '', name: '' },
                         priority: 'MEDIUM',
                         status: '',
-                        columnId: ''
+                        columnId: '',
+                        ticketId: '' // Reset ticketId
                       });
                     }}
                     className="text-gray-500 hover:text-gray-700"
@@ -1566,7 +1571,8 @@ export default function SubProjectView() {
                         assignee: { id: '', name: '' },
                         priority: 'MEDIUM',
                         status: '',
-                        columnId: ''
+                        columnId: '',
+                        ticketId: '' // Reset ticketId
                       });
                     }}
                     className="px-6 py-2.5 text-base text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg shadow-sm"

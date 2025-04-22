@@ -4,6 +4,8 @@ import { useUser } from '../../context/userContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
+const API_DB_URL = import.meta.env.VITE_IMANAGER_DB_API;
+
 interface LogoUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -60,7 +62,7 @@ export const LogoUploadModal: React.FC<LogoUploadModalProps> = ({ isOpen, onClos
       const loggedId = user?.role === 'ADMIN' ? user?.id : user?.orgId;
       // Then send the Cloudinary URL to your backend
       const response = await axios.post(
-        `https://imanager2.duckdns.org/api/service1/db/api/org/upload/logo/${loggedId}?logoUrl=${encodeURIComponent(cloudinaryUrl)}`,
+        `${API_DB_URL}/db/api/org/upload/logo/${loggedId}?logoUrl=${encodeURIComponent(cloudinaryUrl)}`,
         {},
         {
           headers: {
