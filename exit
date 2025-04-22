@@ -1,0 +1,236 @@
+[33mcommit dc5d16e49e6cd1aee9d5973bff9853aaf86e100e[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Sun Apr 20 17:06:46 2025 +0530
+
+    Update Dashboard.tsx
+
+[33mcommit ffe55e5d11b67f61e325abb9e72d364672829408[m
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Sun Apr 20 02:22:55 2025 +0530
+
+    Update SubProjectView.tsx
+
+[33mcommit 445c13fb64d7dd19d69d65674f325e24dc2dfe52[m
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Sun Apr 20 02:19:35 2025 +0530
+
+    Update ProjectView.tsx
+
+[33mcommit d82a4a67c000cbf133e9b301239caecdb9b603e6[m
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Sun Apr 20 02:18:05 2025 +0530
+
+    Update Dashboard.tsx
+
+[33mcommit 3103b06d74b9cd43e42accdc50a52edd8d1bc62a[m
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Sun Apr 20 02:16:53 2025 +0530
+
+    Update Sidebar.tsx
+
+[33mcommit 8392374e7536a147c6b9f4587d9513f9d45960d6[m
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Sun Apr 20 02:16:04 2025 +0530
+
+    Update CreateRoleModal.tsx
+
+[33mcommit b537c4470943bdb86a748ed6e3f4d580c686144b[m
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Sun Apr 20 02:15:02 2025 +0530
+
+    Update InviteModal.tsx
+
+[33mcommit 9ebfce72651f035591b4ce4c4a0fae1a15ea6950[m
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Sun Apr 20 02:14:34 2025 +0530
+
+    Update LogoUploadModal.tsx
+
+[33mcommit f9b0bdee9ef5d31431486494ead6fec8bb1ff67a[m
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Sun Apr 20 02:08:15 2025 +0530
+
+    Update LogoUploadModal.tsx
+
+[33mcommit f2e389457dbd59cf464b94048a183cedf23091f0[m
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Sun Apr 20 02:07:49 2025 +0530
+
+    Update InviteModal.tsx
+
+[33mcommit 6019a40cb5e33abdce49148d61a3fa22c8d02c2f[m
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Sun Apr 20 02:07:14 2025 +0530
+
+    Update CreateRoleModal.tsx
+
+[33mcommit 3e1ea493268a18e8679e508369a84088a56d48b2[m
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Sun Apr 20 02:06:23 2025 +0530
+
+    Update Sidebar.tsx
+
+[33mcommit dc72e18bd098061b9b8013ee9ff2d9ccbd31ed50[m
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Sun Apr 20 02:04:59 2025 +0530
+
+    Update SubProjectView.tsx
+
+[33mcommit a84c7eadeaeb39eb5dd2dcdd57c4e66526a928ad[m
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Sun Apr 20 02:01:36 2025 +0530
+
+    Update SignupPage.tsx
+
+[33mcommit 72660a6131429549af2a2896ad74843f6bdb5571[m
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Sun Apr 20 02:01:04 2025 +0530
+
+    Update ProjectView.tsx
+
+[33mcommit ee1c5cab7fd1c1b8c268f5bfb2333aea7fc40e11[m
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Sun Apr 20 01:59:54 2025 +0530
+
+    Update Dashboard.tsx
+
+[33mcommit aa9962cdd6f89fbb3f4551dbdc024c15dfd625ad[m
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Sun Apr 20 01:09:12 2025 +0530
+
+    Update LoginPage.tsx
+
+[33mcommit fd0c12b752847799f901367ecb6cf6f40e0e1ded[m
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Sun Apr 20 00:29:01 2025 +0530
+
+    Update LoginPage.tsx
+
+[33mcommit f913b6c69ff21b6ca86165fc377bb45e66fc2ce4[m
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Sun Apr 20 00:05:38 2025 +0530
+
+    Update LoginPage.tsx
+
+[33mcommit 71c98021bd2ed17fc3688d4aecf6cf8c8a39cea1[m
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Sat Apr 19 21:49:45 2025 +0530
+
+    Update LoginPage.tsx
+
+[33mcommit 341709fa1b2b691822dac0e754af4f35dee45835[m
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Sat Apr 19 21:22:36 2025 +0530
+
+    Update LoginPage.tsx
+
+[33mcommit abc92eb2c32b6ff8b7cb877fb2c592524f679d97[m
+Merge: a817e31 5205737
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Sat Apr 19 01:24:53 2025 +0530
+
+    Merge pull request #12 from ashwani-10/dev/IMTK358901
+    
+    dev/IMTK358901: github integration with imanager tickets
+
+[33mcommit 5205737239eadb6af009ed4267f4f8b7b1cc49cf[m
+Author: ashwani-10 <85514113+ashwani-10@users.noreply.github.com>
+Date:   Sat Apr 19 01:03:05 2025 +0530
+
+    dev/IMTK358901: github integration with imanager tickets
+
+[33mcommit a817e31c7713abb3acb35ced14642d6110d48b1f[m
+Merge: f3bac23 49acb47
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Tue Apr 15 16:15:14 2025 +0530
+
+    Merge pull request #9 from ashwani-10/dev/IMTK759270
+    
+    dev/IMTK759270: Github integrated with iManager tickets
+
+[33mcommit 49acb47eca7f05d1d062b9f0e9b509ca7860449a[m[33m ([m[1;31morigin/dev/IMTK759270[m[33m, [m[1;32mdev/IMTK759270[m[33m)[m
+Author: ashwani-10 <85514113+ashwani-10@users.noreply.github.com>
+Date:   Tue Apr 15 16:12:08 2025 +0530
+
+    dev/IMTK759270: Github integrated with iManager tickets
+
+[33mcommit f3bac23e0a562671539bd6decbaf2af4c4c4ed98[m
+Merge: ebc30d8 1e8f050
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Tue Apr 15 15:22:55 2025 +0530
+
+    Merge pull request #8 from ashwani-10/dev/IMTK759270
+    
+    dev/IMTK759270: Github PR is automated with iManager Tickets
+
+[33mcommit 1e8f0509c101964061a3b24ca46c6a5e58edf112[m
+Author: ashwani-10 <85514113+ashwani-10@users.noreply.github.com>
+Date:   Tue Apr 15 15:13:47 2025 +0530
+
+    dev/IMTK759270: Github PR is automated with iManager Tickets
+
+[33mcommit ebc30d804b670432185f15570b39bc9e8bdafb5e[m
+Merge: cd7a892 fc1a01d
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Mon Apr 14 03:30:56 2025 +0530
+
+    Merge pull request #7 from ashwani-10/dev/IMTK427190
+    
+    IMTK427190: Pull Request section added
+
+[33mcommit fc1a01d5c83d7465a103ca4a75435fd06efa8510[m[33m ([m[1;31morigin/dev/IMTK427190[m[33m, [m[1;32mdev/IMTK427190[m[33m)[m
+Author: ashwani-10 <85514113+ashwani-10@users.noreply.github.com>
+Date:   Mon Apr 14 03:28:03 2025 +0530
+
+    Pull Request section added
+
+[33mcommit cd7a8926cca7b188ac671b3a5726a665b98e2a88[m
+Merge: d42849d f0652a6
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Mon Apr 14 03:02:34 2025 +0530
+
+    Merge pull request #6 from ashwani-10/dev/IMTK427190
+    
+    IMTK427190: Pull request section added
+
+[33mcommit f0652a6ab9063ed3b4c8eaca96e51ae921c17252[m
+Author: ashwani-10 <85514113+ashwani-10@users.noreply.github.com>
+Date:   Mon Apr 14 03:00:14 2025 +0530
+
+    IMTK427190: Pull request section added
+
+[33mcommit d42849df286e4030d32217f432fd9e8906d6a591[m
+Merge: ffa1f89 442d8ef
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Mon Apr 14 02:47:13 2025 +0530
+
+    Merge pull request #5 from ashwani-10/dev/IMTK198585
+    
+    IMTK198585: github repos list added for connection
+
+[33mcommit 442d8efe50717b856b8441c54f45a48a8ff7150b[m[33m ([m[1;31morigin/dev/IMTK198585[m[33m, [m[1;32mdev/IMTK198585[m[33m)[m
+Author: ashwani-10 <85514113+ashwani-10@users.noreply.github.com>
+Date:   Mon Apr 14 01:01:14 2025 +0530
+
+    IMTK198585: github repos list added for connection
+
+[33mcommit ffa1f896a99bc12260bb7efcc7f59c1def5c326e[m
+Merge: 92ca712 ce84600
+Author: Ashwani <85514113+ashwani-10@users.noreply.github.com>
+Date:   Sun Apr 13 15:23:17 2025 +0530
+
+    Merge pull request #1 from ashwani-10/dev/ashwani
+    
+    github connected
+
+[33mcommit ce84600621788ef15ef2ce9744ae58a7d732b4f8[m
+Author: ashwani-10 <85514113+ashwani-10@users.noreply.github.com>
+Date:   Sun Apr 13 13:49:49 2025 +0530
+
+    github connected
+
+[33mcommit 92ca712624943dc29019083b4ac14fb569796733[m
+Author: ashwani-10 <85514113+ashwani-10@users.noreply.github.com>
+Date:   Sat Apr 5 23:00:15 2025 +0530
+
+    first commit
