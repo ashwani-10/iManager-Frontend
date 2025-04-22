@@ -5,8 +5,6 @@ import { Plus } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-const API_PT_URL = import.meta.env.VITE_IMANAGER_PT_API;
-
 interface Project {
   projectId: string;
   name: string;
@@ -70,7 +68,7 @@ export default function ProjectView() {
         if (!token) throw new Error('Authentication token not found');
 
         const response = await axios.get(
-          `${API_PT_URL}/api/subProject/get/${projectId}`,
+          `https://imanager2.duckdns.org/api/service2/api/subProject/get/${projectId}`,
           {
             headers: { 'Authorization': `Bearer ${token}` },
             params: { page, limit }
@@ -107,7 +105,7 @@ export default function ProjectView() {
         const token = localStorage.getItem('token');
         if (!token) throw new Error('Authentication token not found');
 
-        const response = await axios.get(`${API_PT_URL}/api/github/repos`, {
+        const response = await axios.get('https://imanager2.duckdns.org/api/service2/api/github/repos', {
           headers: { 'Authorization': `Bearer ${token}` },
         });
 
@@ -140,11 +138,11 @@ export default function ProjectView() {
       }
 
       const response = await axios.post(
-        `${API_PT_URL}/api/subProject/create`,
+        'https://imanager2.duckdns.org/api/service2/api/subProject/create',
         { 
           name: newSubProjectName, 
           projectId, 
-          repoName: selectedRepository || null
+          repoName: selectedRepository || null // Allow null for repoName
         },
         {
           headers: {

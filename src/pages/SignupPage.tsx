@@ -5,8 +5,6 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ScrollReveal from '../components/ScrollReveal';
 
-const API_MAIN_URL = import.meta.env.VITE_IMANAGER_MAIN_API;
-
 interface Payload {
   name: string;
   email: string;
@@ -64,7 +62,7 @@ export default function SignupPage() {
     };
 
     try {
-      const response = await axios.post(`${API_MAIN_URL}/api/v1/org/registration?amount=${formData.planPrice}&currency=INR`, payload);
+      const response = await axios.post(`https://imanager.duckdns.org/api/v1/org/registration?amount=${formData.planPrice}&currency=INR`, payload);
 
       const order = response.data;
       

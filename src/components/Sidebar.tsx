@@ -8,8 +8,6 @@ import { LogoUploadModal } from './modals/LogoUploadModal';
 import { NavButton } from './buttons/NavButton';
 import axios from 'axios';
 
-const API_DB_URL = import.meta.env.VITE_IMANAGER_DB_API;
-
 export default function Sidebar() {
   const navigate = useNavigate();
   const { user } = useUser();
@@ -37,7 +35,7 @@ export default function Sidebar() {
       
       try {
         const loggedId = user?.role === 'ADMIN' ? user?.id : user?.orgId;
-        const response = await axios.get(`${API_DB_URL}/db/api/org/get/logo/${loggedId}`, {
+        const response = await axios.get(`https://imanager2.duckdns.org/api/service1/db/api/org/get/logo/${loggedId}`, {
         });
         if (response.data) {
           setCompanyLogo(response.data);
@@ -125,7 +123,7 @@ export default function Sidebar() {
         console.log('GitHub OAuth Code:', authCode);
   
         try {
-          const response = await axios.post(`${API_DB_URL}/api/github/exchange`, null, {
+          const response = await axios.post('https://imanager2.duckdns.org/api/service1/api/github/exchange', null, {
             params: { authCode, loggedId },
           });
           console.log('Token exchange response:', response.data);
