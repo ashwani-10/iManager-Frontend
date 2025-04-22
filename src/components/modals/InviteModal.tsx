@@ -3,6 +3,8 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useUser } from '../../context/userContext';
 
+const API_PT_URL = import.meta.env.VITE_IMANAGER_PT_API;
+
 interface InviteModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -28,7 +30,7 @@ export const InviteModal: React.FC<InviteModalProps> = ({ isOpen, onClose }) => 
     try {
       const response = await axios({
         method: 'POST',
-        url: `http://localhost:8085/api/member/invite/${user.id}`,
+        url: `${API_PT_URL}/api/member/invite/${user.id}`,
         params: { inviteEmail, role: inviteRole },
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,

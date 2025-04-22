@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invite - iManager</title>
+    <link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230052CC'/><path d='M8 16L14 22L24 10' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/></svg>" type="image/svg+xml" />
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/react-toastify/8.2.0/react-toastify.min.css">
+    <style>
+        :root {
+            --form-width: 700px;
+            --input-width: 550px;
+            --form-height: auto;
+            --input-height: 60px;
+            --button-height: 60px;
+            --primary-color: #007bff;
+            --primary-dark: #0056b3;
+            --text-color: #2d3748;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f6f8fa 0%, #ffffff 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50vh;
+            background: linear-gradient(135deg, #e3f2fd 0%, #f6f8fa 100%);
+            z-index: -1;
+        }
+
+        .background-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.1;
+            filter: blur(40px);
+            transition: all 0.5s ease;
+        }
+
+        .shape-1 {
+            width: 600px;
+            height: 600px;
+            background: linear-gradient(135deg, #007bff 0%, #00b4d8 100%);
+            top: -200px;
+            right: -200px;
+            transform: rotate(45deg);
+        }
+
+        .shape-2 {
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(135deg, #0056b3 0%, #007bff 100%);
+            bottom: -150px;
+            left: -150px;
+            transform: rotate(-30deg);
+        }
+
+        .shape-3 {
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(135deg, #00b4d8 0%, #007bff 100%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(15deg);
+        }
+
+        .decorative-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .decorative-element {
+            position: absolute;
+            font-size: 2rem;
+            color: var(--primary-color);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .checkmark {
+            font-size: 3rem;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .team-icon {
+            font-size: 2.5rem;
+            top: 30%;
+            right: 15%;
+            animation-delay: 1s;
+        }
+
+        .task-icon {
+            font-size: 2.5rem;
+            bottom: 25%;
+            left: 20%;
+            animation-delay: 2s;
+        }
+
+        .calendar-icon {
+            font-size: 2.5rem;
+            bottom: 35%;
+            right: 25%;
+            animation-delay: 3s;
+        }
+
+        .project-icon {
+            font-size: 2.5rem;
+            top: 40%;
+            left: 30%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(5deg);
+            }
+        }
+
+        .shape:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.95);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-container:hover {
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .input-field {
+            height: var(--input-height);
+            font-size: 1.125rem;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 0 1.5rem;
+        }
+
+        .input-field:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.1);
+            background: white;
+        }
+
+        .input-field:hover {
+            border-color: var(--primary-color);
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            font-weight: 500;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .submit-button {
+            height: var(--button-height);
+            font-size: 1.125rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            padding: 0 2rem;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+        }
+
+        .submit-button:active {
+            transform: translateY(0);
+        }
+
+        .submit-button .spinner {
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin-right: 0.5rem;
+        }
+
+        .submit-button span {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+        .heading {
+            color: var(--text-color);
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.5rem;
+            position: relative;
+            display: inline-block;
+            font-size: 2.5rem;
+            line-height: 1.2;
+        }
+
+        .heading::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 4px;
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+
+        .subtitle {
+            color: var(--text-color);
+            opacity: 0.8;
+            font-size: 1.125rem;
+            line-height: 1.5;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .error-message {
+            background-color: #fee2e2;
+            color: #dc2626;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .error-message.hidden {
+            display: none;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 1280px) {
+            :root {
+                --form-width: 600px;
+                --input-width: 500px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            :root {
+                --form-width: 500px;
+                --input-width: 400px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            :root {
+                --form-width: 90%;
+                --input-width: 100%;
+                --input-height: 50px;
+                --button-height: 50px;
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+
+        .fade-up {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .input-focus-ring {
+            transition: all 0.3s ease;
+        }
+
+        .input-focus-ring:focus {
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-group input:focus + label,
+        .form-group input:not(:placeholder-shown) + label {
+            transform: translateY(-1.5rem) scale(0.85);
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 640px) {
+            .form-group label {
+                font-size: 0.75rem;
+            }
+
+            .input-field {
+                font-size: 1rem;
+            }
+
+            .submit-button {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <div class="decorative-elements">
+        <div class="decorative-element checkmark">✓</div>
+        <div class="decorative-element team-icon">👥</div>
+        <div class="decorative-element task-icon">📋</div>
+        <div class="decorative-element calendar-icon">📅</div>
+        <div class="decorative-element project-icon">📊</div>
+    </div>
+
+    <div class="container mx-auto min-h-screen flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="form-container space-y-10 fade-up p-12">
+            <div class="text-center">
+                <h2 class="heading">
+                    Start Your Journey
+                </h2>
+                <p class="subtitle">
+                    Join our team and start managing your tasks efficiently
+                </p>
+            </div>
+            
+            <div id="errorMessage" class="error-message hidden"></div>
+
+            <div class="bg-white/50 rounded-xl p-10">
+                <form id="signupForm" class="space-y-12">
+                    <div class="space-y-10">
+                        <!-- Organization Name Input -->
+                        <div class="form-group">
+                            <label for="org-name">
+                                Your Name
+                            </label>
+                            <input
+                                id="org-name"
+                                name="orgName"
+                                type="text"
+                                required
+                                class="input-field block w-full border border-gray-200 rounded-lg input-focus-ring focus:outline-none focus:border-[#007bff] transition-all"
+                                placeholder="Enter your name"
+                            />
+                        </div>
+
+                        <!-- Email Input -->
+                        <div class="form-group">
+                            <label for="email-address">
+                                Email Address
+                            </label>
+                            <input
+                                id="email-address"
+                                name="email"
+                                type="email"
+                                required
+                                readonly
+                                class="input-field block w-full border border-gray-200 rounded-lg input-focus-ring focus:outline-none focus:border-[#007bff] transition-all bg-gray-50 cursor-not-allowed"
+                                placeholder="Enter your email"
+                            />
+                        </div>
+
+                        <!-- Password Input -->
+                        <div class="form-group">
+                            <label for="password">
+                                Password
+                            </label>
+                            <input
+                                id="password"
+                                name="password"
+                                type="password"
+                                required
+                                class="input-field block w-full border border-gray-200 rounded-lg input-focus-ring focus:outline-none focus:border-[#007bff] transition-all"
+                                placeholder="Enter your password"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="pt-10 flex justify-center">
+                        <button
+                            type="submit"
+                            id="submitButton"
+                            class="submit-button w-[var(--input-width)] text-white bg-black hover:bg-gray-800 rounded-lg shadow-lg font-semibold"
+                        >
+                            <span>
+                                <svg class="spinner hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span>Create Account</span>
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize form elements
+        const form = document.getElementById('signupForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const submitButton = document.getElementById('submitButton');
+        const emailInput = document.getElementById('email-address');
+
+        // Function to get URL parameters
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            const results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        // Set email from URL parameter
+        document.addEventListener('DOMContentLoaded', () => {
+            const email = getUrlParameter('email');
+            if (email) {
+                emailInput.value = email;
+            }
+
+            const fadeUpElement = document.querySelector('.fade-up');
+            fadeUpElement.classList.add('visible');
+        });
+
+        // Handle form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('org-name').value,
+                email: document.getElementById('email-address').value,
+                password: document.getElementById('password').value
+            };
+
+            try {
+                submitButton.disabled = true;
+                const spinner = submitButton.querySelector('.spinner');
+                const text = submitButton.querySelector('span span');
+                spinner.classList.remove('hidden');
+                text.textContent = 'Creating account...';
+
+                // First, validate the form data
+                if (!formData.name || !formData.email || !formData.password) {
+                    throw new Error('Please fill in all required fields');
+                }
+
+                if (!formData.email.includes('@')) {
+                    throw new Error('Please enter a valid email address');
+                }
+
+                if (formData.password.length < 8) {
+                    throw new Error('Password must be at least 8 characters long');
+                }
+
+                const response = await fetch(`${API_MAIN_URL}/api/v1/user/registration`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: formData.name,
+                        email: formData.email,
+                        password: formData.password
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to create account');
+                }
+
+                // Redirect to imanager.vercel.app on success
+                alert('Account created successfully!');
+                window.location.href = "https://imanager.vercel.app";
+            } catch (error) {
+                console.error('Signup error:', error);
+                errorMessage.textContent = error.message || 'Failed to sign up. Please try again.';
+                errorMessage.classList.remove('hidden');
+            } finally {
+                submitButton.disabled = false;
+                const spinner = submitButton.querySelector('.spinner');
+                const text = submitButton.querySelector('span span');
+                spinner.classList.add('hidden');
+                text.textContent = 'Create Account';
+            }
+        });
+    </script>
+</body>
+</html>
