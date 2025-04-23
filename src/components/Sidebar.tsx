@@ -52,7 +52,7 @@ export default function Sidebar() {
   }, [user?.id, user?.role, companyLogo]);
 
   const handleLogout = () => {
-    ['token', 'user', 'projects', 'companyLogo'].forEach(item => localStorage.removeItem(item));
+    localStorage.clear();
     navigate('/');
   };
 
