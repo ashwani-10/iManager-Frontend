@@ -68,7 +68,7 @@ export default function ProjectView() {
         if (!token) throw new Error('Authentication token not found');
 
         const response = await axios.get(
-          `${import.meta.env.VITE_IMANAGER_PT_API}/api/subProject/get/${projectId}`,
+          `https://imanager2.duckdns.org/api/service2/api/subProject/get/${projectId}`,
           {
             headers: { 'Authorization': `Bearer ${token}` },
             params: { page, limit }
@@ -105,7 +105,7 @@ export default function ProjectView() {
         const token = localStorage.getItem('token');
         if (!token) throw new Error('Authentication token not found');
 
-        const response = await axios.get(`${import.meta.env.VITE_IMANAGER_PT_API}/api/github/repos`, {
+        const response = await axios.get('https://imanager2.duckdns.org/api/service2/api/github/repos', {
           headers: { 'Authorization': `Bearer ${token}` },
         });
 
@@ -138,7 +138,7 @@ export default function ProjectView() {
       }
 
       const response = await axios.post(
-        `${import.meta.env.VITE_IMANAGER_PT_API}/api/subProject/create`,
+        'https://imanager2.duckdns.org/api/service2/api/subProject/create',
         { 
           name: newSubProjectName, 
           projectId, 
