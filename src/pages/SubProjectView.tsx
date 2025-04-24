@@ -5,6 +5,7 @@ import { Plus, X, Edit2, Users, Clock, AlertCircle, UserPlus, User, ChevronDown 
 import Sidebar from '../components/Sidebar';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { useUser } from '../contexts/UserContext';
 
 // Add these interfaces at the top
 interface Task {
@@ -57,6 +58,7 @@ interface TaskPayload {
 
 export default function SubProjectView() {
   const { projectId, subProjectId } = useParams();
+  const { user } = useUser();
   const [userRole, setUserRole] = useState('');
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [showAddColumnModal, setShowAddColumnModal] = useState(false);
@@ -923,6 +925,9 @@ export default function SubProjectView() {
     );
   };
 
+  const isAdmin = user?.role === 'ADMIN';
+  const canCreateColumn = isAdmin || (user?.operations?.includes('create-columns') ?? false);
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="flex h-screen overflow-hidden bg-[#F4F5F7]">
@@ -1010,218 +1015,217 @@ export default function SubProjectView() {
               </div>
             </div>
             <div className="flex gap-3">
-              {userRole === 'ADMIN' && (
-                <>
-                  <div className="relative">
-                    <button
-                      onClick={() => setShowAddColumnModal(!showAddColumnModal)}
-                      className="flex items-center gap-2 border border-[#0052CC] text-[#0052CC] px-4 py-2 text-sm font-medium rounded-lg hover:bg-[#DEEBFF] transition-all shadow-sm"
-                      title="Add Column"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Add Column
-                      <ChevronDown className="w-4 h-4" />
-                    </button>
-                    {showAddColumnModal && (
-                      <>
-                        <div className="fixed inset-0" onClick={() => setShowAddColumnModal(false)} />
-                        <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                          <div className="p-4">
-                            <h3 className="text-sm font-semibold text-gray-700 mb-3">Add New Column</h3>
-                            <input
-                              type="text"
-                              placeholder="Enter column name"
-                              value={newColumnName}
-                              onChange={(e) => setNewColumnName(e.target.value)}
-                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                            <div className="flex justify-end gap-2 mt-4">
-                              <button
-                                onClick={() => setShowAddColumnModal(false)}
-                                className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
-                              >
-                                Cancel
-                              </button>
-                              <button
-                                onClick={handleAddColumn}
-                                disabled={!newColumnName.trim()}
-                                className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                              >
-                                Add
-                              </button>
-                            </div>
+              {canCreateColumn && (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowAddColumnModal(!showAddColumnModal)}
+                    className="flex items-center gap-2 border border-[#0052CC] text-[#0052CC] px-4 py-2 text-sm font-medium rounded-lg hover:bg-[#DEEBFF] transition-all shadow-sm"
+                    title="Add Column"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add Column
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+                  {showAddColumnModal && (
+                    <>
+                      <div className="fixed inset-0" onClick={() => setShowAddColumnModal(false)} />
+                      <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                        <div className="p-4">
+                          <h3 className="text-sm font-semibold text-gray-700 mb-3">Add New Column</h3>
+                          <input
+                            type="text"
+                            placeholder="Enter column name"
+                            value={newColumnName}
+                            onChange={(e) => setNewColumnName(e.target.value)}
+                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                          <div className="flex justify-end gap-2 mt-4">
+                            <button
+                              onClick={() => setShowAddColumnModal(false)}
+                              className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={handleAddColumn}
+                              disabled={!newColumnName.trim()}
+                              className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                            >
+                              Add
+                            </button>
                           </div>
                         </div>
-                      </>
-                    )}
-                  </div>
-
-                  <div className="relative">
-                    <button
-                      onClick={() => setShowAddMemberModal(!showAddMemberModal)}
-                      className="flex items-center gap-2 border border-[#0052CC] text-[#0052CC] px-4 py-2 text-sm font-medium rounded-lg hover:bg-[#DEEBFF] transition-all shadow-sm"
-                      title="Add Member"
-                    >
-                      <UserPlus className="w-4 h-4" />
-                      Add Member
-                      <ChevronDown className="w-4 h-4" />
-                    </button>
-                    {showAddMemberModal && (
-                      <>
-                        <div className="fixed inset-0" onClick={() => setShowAddMemberModal(false)} />
-                        <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-45">
-                          <div className="p-4 border-b border-gray-200">
-                            <h3 className="text-sm font-semibold text-gray-700 mb-3">Add New Member</h3>
-                            <div className="space-y-3">
-                              <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Select Member</label>
-                                <div className="relative" id="member-dropdown">
-                                  {selectedMember ? (
-                                    <div className="w-full px-3 py-2 border border-gray-300 rounded-lg flex items-center justify-between">
-                                      <div className="flex items-center gap-2">
-                                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                                          <span className="text-sm font-medium text-blue-600">
-                                            {orgMembers.find(m => m.id === selectedMember)?.name.charAt(0)}
-                                          </span>
-                                        </div>
-                                        <div className="flex flex-col">
-                                          <span className="text-sm text-gray-900">
-                                            {orgMembers.find(m => m.id === selectedMember)?.name}
-                                          </span>
-                                          <span className="text-xs text-gray-500">
-                                            {orgMembers.find(m => m.id === selectedMember)?.email}
-                                          </span>
-                                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+              {userRole === 'ADMIN' && (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowAddMemberModal(!showAddMemberModal)}
+                    className="flex items-center gap-2 border border-[#0052CC] text-[#0052CC] px-4 py-2 text-sm font-medium rounded-lg hover:bg-[#DEEBFF] transition-all shadow-sm"
+                    title="Add Member"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    Add Member
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+                  {showAddMemberModal && (
+                    <>
+                      <div className="fixed inset-0" onClick={() => setShowAddMemberModal(false)} />
+                      <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-45">
+                        <div className="p-4 border-b border-gray-200">
+                          <h3 className="text-sm font-semibold text-gray-700 mb-3">Add New Member</h3>
+                          <div className="space-y-3">
+                            <div>
+                              <label className="block text-xs font-medium text-gray-700 mb-1">Select Member</label>
+                              <div className="relative" id="member-dropdown">
+                                {selectedMember ? (
+                                  <div className="w-full px-3 py-2 border border-gray-300 rounded-lg flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                        <span className="text-sm font-medium text-blue-600">
+                                          {orgMembers.find(m => m.id === selectedMember)?.name.charAt(0)}
+                                        </span>
                                       </div>
-                                      <button
+                                      <div className="flex flex-col">
+                                        <span className="text-sm text-gray-900">
+                                          {orgMembers.find(m => m.id === selectedMember)?.name}
+                                        </span>
+                                        <span className="text-xs text-gray-500">
+                                          {orgMembers.find(m => m.id === selectedMember)?.email}
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <button
+                                      onClick={() => {
+                                        setSelectedMember('');
+                                        setSearchOrgMember('');
+                                      }}
+                                      className="text-gray-400 hover:text-gray-600"
+                                    >
+                                      <X className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <div className="relative">
+                                    <input
+                                      type="text"
+                                      placeholder="Search by name or email..."
+                                      value={searchOrgMember}
+                                      onChange={(e) => {
+                                        setSearchOrgMember(e.target.value);
+                                        setIsSearching(true);
+                                      }}
+                                      onFocus={() => setIsSearching(true)}
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                    <div className="absolute right-3 top-2.5 text-gray-400">
+                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                      </svg>
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                {isSearching && !selectedMember && (
+                                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                    {filterOrgMembers(orgMembers).map(member => (
+                                      <div
+                                        key={member.id}
                                         onClick={() => {
-                                          setSelectedMember('');
+                                          setSelectedMember(member.id);
+                                          setIsSearching(false);
                                           setSearchOrgMember('');
                                         }}
-                                        className="text-gray-400 hover:text-gray-600"
+                                        className="flex items-center gap-3 p-2 hover:bg-gray-50 cursor-pointer"
                                       >
-                                        <X className="w-4 h-4" />
-                                      </button>
-                                    </div>
-                                  ) : (
-                                    <div className="relative">
-                                      <input
-                                        type="text"
-                                        placeholder="Search by name or email..."
-                                        value={searchOrgMember}
-                                        onChange={(e) => {
-                                          setSearchOrgMember(e.target.value);
-                                          setIsSearching(true);
-                                        }}
-                                        onFocus={() => setIsSearching(true)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                      />
-                                      <div className="absolute right-3 top-2.5 text-gray-400">
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                        </svg>
+                                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                                          <span className="text-sm font-medium text-blue-600">
+                                            {member.name.charAt(0)}
+                                          </span>
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                          <p className="text-sm font-medium text-gray-900 truncate">
+                                            {member.name}
+                                          </p>
+                                          <p className="text-xs text-gray-500 truncate">
+                                            {member.email}
+                                          </p>
+                                        </div>
                                       </div>
-                                    </div>
-                                  )}
-                                  
-                                  {isSearching && !selectedMember && (
-                                    <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                                      {filterOrgMembers(orgMembers).map(member => (
-                                        <div
-                                          key={member.id}
-                                          onClick={() => {
-                                            setSelectedMember(member.id);
-                                            setIsSearching(false);
-                                            setSearchOrgMember('');
-                                          }}
-                                          className="flex items-center gap-3 p-2 hover:bg-gray-50 cursor-pointer"
-                                        >
-                                          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                                            <span className="text-sm font-medium text-blue-600">
-                                              {member.name.charAt(0)}
-                                            </span>
-                                          </div>
-                                          <div className="min-w-0 flex-1">
-                                            <p className="text-sm font-medium text-gray-900 truncate">
-                                              {member.name}
-                                            </p>
-                                            <p className="text-xs text-gray-500 truncate">
-                                              {member.email}
-                                            </p>
-                                          </div>
-                                        </div>
-                                      ))}
-                                      {filterOrgMembers(orgMembers).length === 0 && (
-                                        <div className="text-center py-4">
-                                          <p className="text-sm text-gray-500">No matching members found</p>
-                                        </div>
-                                      )}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-
-                              <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Select Role</label>
-                                <div className="relative">
-                                  <button
-                                    onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
-                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded flex items-center justify-between"
-                                  >
-                                    {selectedRole
-                                      ? roles.find(r => r.id === selectedRole)?.name
-                                      : 'Select Role'}
-                                    <ChevronDown className="w-4 h-4 text-gray-500" />
-                                  </button>
-                                  {isRoleDropdownOpen && (
-                                    <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                                      {roles.map(role => (
-                                        <div
-                                          key={role.id}
-                                          onClick={() => {
-                                            setSelectedRole(role.id);
-                                            setIsRoleDropdownOpen(false);
-                                          }}
-                                          className="px-3 py-2 hover:bg-gray-50 cursor-pointer"
-                                        >
-                                          <p className="text-sm font-medium text-gray-700">{role.name}</p>
-                                          <p className="text-xs text-gray-500">{role.description}</p>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
+                                    ))}
+                                    {filterOrgMembers(orgMembers).length === 0 && (
+                                      <div className="text-center py-4">
+                                        <p className="text-sm text-gray-500">No matching members found</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
                               </div>
                             </div>
 
-                            {addMemberError && (
-                              <p className="text-sm text-red-600 mt-2">{addMemberError}</p>
-                            )}
-
-                            <div className="flex justify-end gap-2 mt-4">
-                              <button
-                                onClick={() => setShowAddMemberModal(false)}
-                                className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
-                              >
-                                Cancel
-                              </button>
-                              <button
-                                onClick={handleAddMember}
-                                disabled={!selectedMember || !selectedRole || isAddingMember}
-                                className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
-                              >
-                                {isAddingMember && (
-                                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-700 mb-1">Select Role</label>
+                              <div className="relative">
+                                <button
+                                  onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
+                                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded flex items-center justify-between"
+                                >
+                                  {selectedRole
+                                    ? roles.find(r => r.id === selectedRole)?.name
+                                    : 'Select Role'}
+                                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                                </button>
+                                {isRoleDropdownOpen && (
+                                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                    {roles.map(role => (
+                                      <div
+                                        key={role.id}
+                                        onClick={() => {
+                                          setSelectedRole(role.id);
+                                          setIsRoleDropdownOpen(false);
+                                        }}
+                                        className="px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                                      >
+                                        <p className="text-sm font-medium text-gray-700">{role.name}</p>
+                                        <p className="text-xs text-gray-500">{role.description}</p>
+                                      </div>
+                                    ))}
+                                  </div>
                                 )}
-                                Add
-                              </button>
+                              </div>
                             </div>
                           </div>
+
+                          {addMemberError && (
+                            <p className="text-sm text-red-600 mt-2">{addMemberError}</p>
+                          )}
+
+                          <div className="flex justify-end gap-2 mt-4">
+                            <button
+                              onClick={() => setShowAddMemberModal(false)}
+                              className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={handleAddMember}
+                              disabled={!selectedMember || !selectedRole || isAddingMember}
+                              className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+                            >
+                              {isAddingMember && (
+                                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                              )}
+                              Add
+                            </button>
+                          </div>
                         </div>
-                      </>
-                    )}
-                  </div>
-                </>
+                      </div>
+                    </>
+                  )}
+                </div>
               )}
             </div>
           </div>
@@ -1235,7 +1239,7 @@ export default function SubProjectView() {
             ) : columns.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-gray-500">
                 <p className="mb-4">No columns found</p>
-                {userRole === 'ADMIN' && (
+                {canCreateColumn && (
                   <button
                     onClick={() => setShowAddColumnModal(true)}
                     className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"

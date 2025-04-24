@@ -14,6 +14,7 @@ interface ModalProps {
   isSubmitting: boolean;
   submitDisabled: boolean;
   customStyles?: React.CSSProperties;
+  children?: React.ReactNode;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -76,6 +77,9 @@ export const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ isOpen, onClos
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [operations, setOperations] = useState<{ id: string; name: string }[]>([]);
 
+  const isAdmin = user?.role === 'ADMIN';
+  const canCreateRole = isAdmin || (user?.operations?.includes('create-role') ?? false);
+
   useEffect(() => {
     const fetchOperations = async () => {
       try {
@@ -90,10 +94,10 @@ export const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ isOpen, onClos
       }
     };
 
-    if (isOpen) {
+    if (isOpen && canCreateRole) {
       fetchOperations();
     }
-  }, [isOpen]);
+  }, [isOpen, canCreateRole]);
 
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
 
@@ -141,6 +145,10 @@ export const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ isOpen, onClos
       setIsCreatingRole(false);
     }
   };
+
+  if (!canCreateRole) {
+    return null;
+  }
 
   return (
     <Modal
