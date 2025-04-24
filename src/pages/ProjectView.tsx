@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar';
 import { Plus } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { useUser } from '../context/userContext';
 
 interface Project {
   projectId: string;
@@ -26,25 +27,27 @@ interface Repository {
 export default function ProjectView() {
   const { projectId } = useParams();
   const navigate = useNavigate();
+  const { user } = useUser();
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [subProjects, setSubProjects] = useState<SubProject[]>([]);
   const [showNewSubProjectModal, setShowNewSubProjectModal] = useState(false);
   const [newSubProjectName, setNewSubProjectName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<string>('');
   const [page, setPage] = useState(1);
   const [limit] = useState(9); // Show 9 items per page
   const [hasMore, setHasMore] = useState(true);
   const [repositories, setRepositories] = useState<string[]>([]); // Update to store a list of strings
   const [selectedRepository, setSelectedRepository] = useState<string | null>(null);
 
+  const isAdmin = user?.role === 'ADMIN';
+  const canCreateSubProject = isAdmin || (user?.operations?.includes('create-subProject') ?? false);
+
   // Load user role and project data from localStorage
   useEffect(() => {
     const userDataString = localStorage.getItem('user');
     if (userDataString) {
       const userData = JSON.parse(userDataString);
-      setUserRole(userData.role);
     }
 
     const savedProject = localStorage.getItem('selectedProject');
@@ -259,7 +262,7 @@ export default function ProjectView() {
             </h1>
             <div className="h-1 w-48 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mt-4"></div>
           </div>
-          {userRole === 'ADMIN' && (
+          {canCreateSubProject && (
             <div className="relative">
               <button
                 onClick={() => setShowNewSubProjectModal((prev) => !prev)}

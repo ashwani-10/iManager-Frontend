@@ -26,6 +26,7 @@ export default function Dashboard() {
   const [hasMore] = useState(false);
 
   const isAdmin = user?.role === 'ADMIN';
+  const canCreateProject = isAdmin || (user?.operations?.includes('create-project') ?? false);
 
   useEffect(() => {
     if (user?.id) {
@@ -190,7 +191,7 @@ export default function Dashboard() {
             </h1>
             <div className="h-1 w-48 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mt-4"></div>
           </div>
-          {user?.role === 'ADMIN' && (
+          {canCreateProject && (
             <div className="relative">
               <button
                 onClick={() => setShowNewProjectModal(!showNewProjectModal)}

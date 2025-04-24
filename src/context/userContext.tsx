@@ -7,6 +7,7 @@ interface User {
   role: 'ADMIN' | 'MEMBER';
   orgName?: string;
   orgId?: string;
+  operations?: string[];
 }
 
 interface UserContextType {
