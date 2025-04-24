@@ -429,6 +429,7 @@ export default function SubProjectView() {
       );
 
       if (response.status === 201 || response.status === 200) {
+        toast.success('Column created successfully!');
         const createdColumn = response.data;
         
         const updatedColumns = [...columns, { 
@@ -927,6 +928,10 @@ export default function SubProjectView() {
 
   const isAdmin = user?.role === 'ADMIN';
   const canCreateColumn = isAdmin || (user?.operations?.includes('create-columns') ?? false);
+  const canAddMembers = isAdmin || (user?.operations?.includes('add-boardMembers') ?? false);
+  const canCreateTask = isAdmin || (user?.operations?.includes('create-task') ?? false);
+  const canDeleteTask = isAdmin || (user?.operations?.includes('delete-task') ?? false);
+  const canUpdateTask = isAdmin || (user?.operations?.includes('update-task') ?? false);
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -1060,7 +1065,7 @@ export default function SubProjectView() {
                   )}
                 </div>
               )}
-              {userRole === 'ADMIN' && (
+              {canAddMembers && (
                 <div className="relative">
                   <button
                     onClick={() => setShowAddMemberModal(!showAddMemberModal)}
@@ -1265,17 +1270,19 @@ export default function SubProjectView() {
                               {column.tasks.length}
                             </span>
                           </div>
-                          <button
-                            onClick={() => {
-                              setShowTaskModal(true);
-                              setIsEditMode(true);
-                              setNewTask(prev => ({ ...prev, columnId: column.id }));
-                            }}
-                            className="bg-white text-blue-600 hover:bg-blue-100 p-2 rounded-full shadow-md transition-all"
-                            title="Add Task"
-                          >
-                            <Plus className="w-5 h-5" />
-                          </button>
+                          {canCreateTask && (
+                            <button
+                              onClick={() => {
+                                setShowTaskModal(true);
+                                setIsEditMode(true);
+                                setNewTask(prev => ({ ...prev, columnId: column.id }));
+                              }}
+                              className="bg-white text-blue-600 hover:bg-blue-100 p-2 rounded-full shadow-md transition-all"
+                              title="Add Task"
+                            >
+                              <Plus className="w-5 h-5" />
+                            </button>
+                          )}
                         </div>
 
                         {/* Add spacing between header and tasks */}
@@ -1379,25 +1386,31 @@ export default function SubProjectView() {
                 <div className="flex items-center gap-3">
                   {newTask.id && (
                     <>
-                      <button
-                        onClick={() => setIsEditMode(!isEditMode)}
-                        className={`px-4 py-1.5 rounded text-sm font-medium ${
-                          isEditMode 
-                            ? 'bg-gray-100 text-gray-600' 
-                            : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
-                        }`}
-                      >
-                        {isEditMode ? 'Cancel Edit' : 'Edit'}
-                      </button>
-                      <button
-                        onClick={() => {
-                          handleDeleteTask(newTask.id, newTask.columnId || '');
-                          setShowTaskModal(false);
-                        }}
-                        className="px-4 py-1.5 rounded text-sm font-medium bg-red-50 text-red-600 hover:bg-red-100"
-                      >
-                        Delete
-                      </button>
+                      {canUpdateTask && (
+                        <button
+                          onClick={() => setIsEditMode(!isEditMode)}
+                          className={`px-4 py-1.5 rounded text-sm font-medium ${
+                            isEditMode 
+                              ? 'bg-gray-100 text-gray-600' 
+                              : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                          }`}
+                          title={isEditMode ? 'Cancel Edit' : 'Edit Task'}
+                        >
+                          {isEditMode ? 'Cancel Edit' : 'Edit'}
+                        </button>
+                      )}
+                      {canDeleteTask && (
+                        <button
+                          onClick={() => {
+                            handleDeleteTask(newTask.id, newTask.columnId || '');
+                            setShowTaskModal(false);
+                          }}
+                          className="px-4 py-1.5 rounded text-sm font-medium bg-red-50 text-red-600 hover:bg-red-100"
+                          title="Delete Task"
+                        >
+                          Delete
+                        </button>
+                      )}
                     </>
                   )}
                   <button 
