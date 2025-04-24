@@ -608,6 +608,8 @@ export default function SubProjectView() {
   };
 
   const onDragEnd = async (result: any) => {
+    if (!canUpdateTask) return; // Prevent drag and drop if user doesn't have permission
+
     const { source, destination } = result;
   
     // Dropped outside a valid droppable
@@ -1295,7 +1297,12 @@ export default function SubProjectView() {
                           className="space-y-3 min-h-[350px]"
                         >
                           {column.tasks.map((task, index) => (
-                            <Draggable key={task.id} draggableId={task.id} index={index}>
+                            <Draggable 
+                              key={task.id} 
+                              draggableId={task.id} 
+                              index={index}
+                              isDragDisabled={!canUpdateTask} // Disable dragging if user doesn't have permission
+                            >
                               {(provided, snapshot) => (
                                 <div
                                   ref={provided.innerRef}
@@ -1303,7 +1310,7 @@ export default function SubProjectView() {
                                   {...provided.dragHandleProps}
                                   className={`bg-white rounded-md shadow-md p-3 border border-gray-300 hover:bg-gray-50 transition-all cursor-pointer ${
                                     snapshot.isDragging ? 'transform scale-105 shadow-lg' : ''
-                                  }`}
+                                  } ${!canUpdateTask ? 'cursor-not-allowed' : ''}`}
                                   onClick={() => handleTaskClick(task, column.id)}
                                 >
                                   {/* Display ticketId */}
