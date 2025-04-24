@@ -5,7 +5,7 @@ import { Plus, X, Edit2, Users, Clock, AlertCircle, UserPlus, User, ChevronDown 
 import Sidebar from '../components/Sidebar';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { useUser } from '../contexts/UserContext';
+import { useUser } from '../context/userContext';
 
 // Add these interfaces at the top
 interface Task {
