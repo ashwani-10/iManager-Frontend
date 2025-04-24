@@ -24,7 +24,7 @@ export default function LoginPage() {
 
     try {
       const response = await axios.post<Record<string, any>>(
-        `${import.meta.env.VITE_IMANAGER_MAIN_API}/api/v1/org/login`,
+        'https://imanager.duckdns.org/api/v1/org/login',
         payload,
             { // Ensure cookies and credentials are sent
       headers: {
